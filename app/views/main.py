@@ -7,4 +7,4 @@ def get_file(request, path):
     return FileResponse(file)
 
 def main(request):
-    return redirect('/xiidot1303')
+    return redirect('/xiidot1303/')
