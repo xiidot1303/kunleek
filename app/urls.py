@@ -1,13 +1,40 @@
-from django.urls import path, re_path
+from django.urls import path, re_path, include
+from rest_framework.routers import DefaultRouter
 from django.contrib.auth.views import (
     LoginView, 
     LogoutView, 
     PasswordChangeDoneView, 
     PasswordChangeView
 )
+from app.views import main
+from app.views.product import ProductViewSet
+from app.views.category import CategoryViewSet
+from app.views.delivery import DeliveryTypeViewSet
+from app.views.banner import BannerViewSet
+from app.views.order import OrderViewSet, OrderItemViewSet
 
-from app.views import (
-    main
+
+router = DefaultRouter()
+router.register(r'products', ProductViewSet, basename='product')
+router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'delivery-types', DeliveryTypeViewSet, basename='delivery-type')
+router.register(r'banners', BannerViewSet, basename='banner')
+router.register(r'orders', OrderViewSet, basename='order')
+router.register(r'order-items', OrderItemViewSet, basename='orderitem')
+
+# Swagger imports
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Store API",
+        default_version='v1',
+        description="API documentation for Product and Category",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
@@ -23,5 +50,11 @@ urlpatterns = [
     # files
     re_path(r'^files/(?P<path>.*)$', main.get_file),
 
+    # API
+    path('api/', include(router.urls)),
 
+    # Swagger/OpenAPI
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
