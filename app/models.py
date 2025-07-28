@@ -80,7 +80,7 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.first_name
-    
+
 
 class Order(models.Model):
     bot_user = models.ForeignKey('bot.Bot_user', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Пользователь бота")

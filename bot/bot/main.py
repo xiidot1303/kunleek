@@ -7,11 +7,21 @@ from django.db import close_old_connections
 
 
 async def start(update: Update, context: CustomContext):
-    text = context.words.main_menu
-    await context.bot.send_message(update.message.chat_id, text)
-    await context.application.update_queue.put(NewsletterUpdate(
-        user_id=context._user_id, text="lalalalalalalal"
-    ))
+    if await is_group(update):
+        return 
+
+    if await is_registered(update.message.chat.id):
+        # some functions
+        await main_menu(update, context)
+    else:
+        hello_text = Strings.hello
+        await update.message.reply_text(
+            hello_text,
+            reply_markup=ReplyKeyboardMarkup(
+                keyboard=[["UZ 🇺🇿", "RU 🇷🇺"]], resize_keyboard=True, one_time_keyboard=True
+            ),
+        )
+        return SELECT_LANG
 
 
 async def newsletter_update(update: NewsletterUpdate, context: CustomContext):

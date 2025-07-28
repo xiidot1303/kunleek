@@ -3,6 +3,7 @@ from django.core.validators import FileExtensionValidator
 
 class Bot_user(models.Model):
     user_id = models.BigIntegerField(null=True)
+    billz_id = models.CharField(null=True, blank=True, max_length=255, verbose_name='ID клиента в Billz')
     name = models.CharField(null=True, blank=True, max_length=256, default='', verbose_name='Имя')
     username = models.CharField(null=True, blank=True, max_length=256, verbose_name='username')
     firstname = models.CharField(null=True, blank=True, max_length=256, verbose_name='Никнейм')
@@ -11,6 +12,7 @@ class Bot_user(models.Model):
         (0, 'uz'),
         (1, 'ru'),
     ]
+    card = models.CharField(null=True, blank=True, max_length=32, verbose_name='Номер карты')
     lang = models.IntegerField(null=True, blank=True, choices=LANG_CHOICES, default=0, verbose_name='Язык')
     date = models.DateTimeField(db_index=True, null=True, auto_now_add=True, blank=True, verbose_name='Дата регистрации')
 
