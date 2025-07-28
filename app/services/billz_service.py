@@ -16,6 +16,7 @@ class ClientDetails:
     first_name = None
     last_name = None
     card = None
+    balance = 0
 
 class BillzService:
     url = "https://api-admin.billz.ai/"
@@ -92,6 +93,7 @@ class BillzService:
         client_details.first_name = response_data.get("first_name")
         client_details.last_name = response_data.get("last_name")
         client_details.card = response_data.get("cards", [])[0]['code'] if response_data.get("cards") else None
+        client_details.balance = response_data.get("balance", 0)
         return client_details
     
     def create_client_card(self, client_id):
