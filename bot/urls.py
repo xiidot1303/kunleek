@@ -4,9 +4,11 @@ from config import BOT_API_TOKEN
 from django.conf import settings
 from django.conf.urls.static import static
 from config import DEBUG
+from bot.views.newsletter import NewsletterView
 
 urlpatterns = [
-    path(BOT_API_TOKEN, botwebhook.BotWebhookView.as_view())
+    path(BOT_API_TOKEN, botwebhook.BotWebhookView.as_view()),
+    path('send-newsletter/', NewsletterView.as_view()),
 ]
 
 if DEBUG:
