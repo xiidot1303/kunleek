@@ -13,6 +13,7 @@ class Category(models.Model):
         blank=True,
         related_name='subcategories'
     )
+    photo = models.FileField(null=True, blank=True, upload_to='category/photos/', verbose_name="Photo")
     index = models.IntegerField(default=0, help_text="Order of the category in the list")
 
     def __str__(self):
@@ -45,6 +46,10 @@ class Product(models.Model):
         return self.name
     
 
+class FavoriteProduct(models.Model):
+    user = models.ForeignKey('bot.Bot_user', on_delete=models.CASCADE, related_name='favorite_products', verbose_name="User")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='favorites', verbose_name="Product")
+    
 
 class DeliveryType(models.Model):
     title_uz = models.CharField(max_length=255, null=True, verbose_name="Название (узбекский)")

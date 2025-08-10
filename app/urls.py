@@ -12,6 +12,7 @@ from app.views.category import CategoryViewSet
 from app.views.delivery import DeliveryTypeViewSet
 from app.views.banner import BannerViewSet
 from app.views.order import OrderViewSet, OrderItemViewSet
+from app.views.favorite_product import FavoriteProductViewSet
 
 
 router = DefaultRouter()
@@ -21,6 +22,7 @@ router.register(r'delivery-types', DeliveryTypeViewSet, basename='delivery-type'
 router.register(r'banners', BannerViewSet, basename='banner')
 router.register(r'orders', OrderViewSet, basename='order')
 router.register(r'order-items', OrderItemViewSet, basename='orderitem')
+router.register(r'favorite-products', FavoriteProductViewSet, basename='favoriteproduct')
 
 # Swagger imports
 from drf_yasg.views import get_schema_view

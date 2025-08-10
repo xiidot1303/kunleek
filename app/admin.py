@@ -40,3 +40,11 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('customer__first_name', 'delivery_type__title_en', 'payment_method')
     list_filter = ('delivery_type', 'payment_method', 'created_at')
     inlines = [OrderItemInline]
+
+
+@admin.register(FavoriteProduct)
+class FavoriteProductAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product')
+    search_fields = ('user__name', 'product__name')
+    list_filter = ('user',)
+    ordering = ('user',)
