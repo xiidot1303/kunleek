@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from app.models import *
+from bot.models import Bot_user
 
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()
@@ -35,10 +36,20 @@ class BannerSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
+        fields = ['product', 'quantity', 'price']
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
         fields = '__all__'
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
+    customer = CustomerSerializer()
+    bot_user = serializers.SlugRelatedField(
+        slug_field='user_id',
+        queryset=Bot_user.objects.all()
+    )
 
     class Meta:
         model = Order
@@ -46,9 +57,16 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])
+        # create new customer
+        customer_data = validated_data.pop('customer')
+        customer = Customer.objects.create(**customer_data)
+        validated_data['customer'] = customer
+        # create new order
         order = Order.objects.create(**validated_data)
         for item_data in items_data:
             OrderItem.objects.create(order=order, **item_data)
+
+        
         return order
 
     def update(self, instance, validated_data):

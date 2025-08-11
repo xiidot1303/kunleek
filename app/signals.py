@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from app.models import *
-from app.services.newsletter_service import send_order_info_to_group
+from app.services.newsletter_service import send_order_info_to_group, send_invoice_to_user
 
 
 @receiver(post_save, sender=Order)

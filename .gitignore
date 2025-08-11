@@ -18,4 +18,5 @@ app/static/assets/*
 !bot/utils/__init__.py
 !bot/bot/__init__.py
 !bot/__init__.py
+!core/__init__.py
 enter_server.sh

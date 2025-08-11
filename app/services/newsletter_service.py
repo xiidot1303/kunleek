@@ -1,17 +1,21 @@
 from celery import shared_task
 import requests
-from config import WEBHOOK_URL
+from config import WEBHOOK_URL, GROUP_ID
 from app.models import Order
 from bot.models import Bot_user
+from bot import Strings
+from asgiref.sync import async_to_sync
 
 
 @shared_task
-def send_newsletter_api(bot_user_id: int, text: str):
+def send_newsletter_api(bot_user_id: int, text: str, inline_buttons=None, keyboard_buttons=None):
     # get current host
     API_URL = f"{WEBHOOK_URL}/send-newsletter/"
     data = {
         "user_id": bot_user_id,
-        "text": text
+        "text": text,
+        "inline_buttons": inline_buttons or [],
+        "keyboard_buttons": keyboard_buttons or []
     }
     requests.post(API_URL, json=data)
 
@@ -28,7 +32,7 @@ def send_order_info_to_group(order_id: int):
         )
     )
     items_text = "\n".join([
-        f"🔹 {item['product__name']} x{item['quantity']} - {item['price']} сум"
+        f"🔹 {item['product__name']} x {item['quantity']} - {item['price']} сум"
         for item in order_items
     ])
 
@@ -39,6 +43,7 @@ def send_order_info_to_group(order_id: int):
         f"📞 Телефон клиента: {order.customer.phone}\n"
         f"📍 Адрес клиента: {order.customer.address}\n\n"
         f"📦 Состав заказа:\n{items_text}\n\n"
+        f"💬 Комментарии: {order.notes}\n\n"
         f"💵 Сумма заказа: {order.subtotal} сум\n"
         f"🚚 Доставка: {order.delivery_price} сум\n"
         f"💰 Общая сумма: {order.total} сум\n\n"
@@ -52,7 +57,7 @@ def send_order_info_to_group(order_id: int):
         f"🔹 Дата регистрации: {bot_user.date.strftime('%Y-%m-%d %H:%M:%S')}\n"
     )
 
-    send_newsletter_api(bot_user_id=bot_user.user_id, text=text)
+    send_newsletter_api(bot_user_id=GROUP_ID, text=text)
 
 
 @shared_task
@@ -62,13 +67,11 @@ def send_invoice_to_user(order_id):
     strings = Strings(user_id=bot_user.user_id)
 
     order_items = list(order.items.values(
-            'product__name', 'color__color', 'size__size', 'quantity', 'price'
+            'product__name', 'quantity', 'price'
         ))
     items_text = "\n".join([
         strings.invoice_item.format(
             product=item['product__name'],
-            color=item['color__color'],
-            size=item['size__size'],
             quantity=item['quantity'],
             price=item['price']
         ) for item in order_items
@@ -83,17 +86,14 @@ def send_invoice_to_user(order_id):
         items=items_text
     )
 
-    markup = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton(
-                text=strings.pay,
-                url=async_to_sync(get_invoice_url)(order.pk, order.total, order.payment_method)
-            )
-        ]]
-    )
-    async_to_sync(application.bot.send_message)(
-        chat_id=bot_user.user_id,
-        text=text,
-        reply_markup=markup,
-        parse_mode=ParseMode.HTML
-    )
+    def get_invoice_url(order_id, total, payment_method):
+        return f"{WEBHOOK_URL}/pay-invoice/{order_id}/{total}/{payment_method}/"
+
+    inline_buttons = [
+        [{
+            "text": strings.pay,
+            "url": get_invoice_url(order.pk, order.total, order.payment_method)
+        }]
+    ]
+
+    send_newsletter_api(bot_user_id=bot_user.user_id, text=text, inline_buttons=inline_buttons)

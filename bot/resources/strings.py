@@ -75,6 +75,27 @@ class Strings:
         ""
     ]
 
+
+    invoice_message = [
+        "🧾 <i>Buyurtma ma'lumotlari:</i>\n\n🆔 Buyurtma ID: {order_id}\n" \
+            "👤 Mijoz: {customer_name}\n\n📦 Buyurtma:\n{items}\n\n💵 Jami: {subtotal} so'm\n🚚 " \
+                "Yetkazib berish: {delivery_price} so'm\n💰 Umumiy: {total} so'm\n\n" \
+                    "<i>Buyurtmani tasdiqlash uchun to'lovni amalga oshiring.</i>",
+        "🧾 Информация о заказе:\n\n🆔 ID заказа: {order_id}\n👤 Клиент: {customer_name}\n\n" \
+            "📦 Заказ:\n{items}\n\n💵 Итого: {subtotal} сум\n🚚 Доставка: {delivery_price} сум\n💰 Общая сумма: {total} сум" \
+            "\n\n<i>Для подтверждения заказа, произведите оплату.</i>"
+    ]
+
+    invoice_item = [
+        """🔹 {product} x{quantity} - {price} so'm""",
+        """🔹 {product} x{quantity} - {price} сум"""
+    ]
+
+    pay = [
+        """To'lovni amalga oshirish 💳""",
+        """Оплатить 💳"""
+    ]
+
     _ = [
         "",
         ""
