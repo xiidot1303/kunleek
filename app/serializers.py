@@ -67,6 +67,7 @@ class FavoriteProductSerializer(serializers.ModelSerializer):
         class Meta:
             model = Product
             fields = '__all__'
+            ref_name = 'FavoriteProduct_ProductSerializer'
 
     product = ProductSerializer(read_only=True)
     class Meta:
