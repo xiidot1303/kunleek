@@ -41,7 +41,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         favorites = FavoriteProduct.objects.filter(user__user_id=user_id, product=OuterRef('pk'))
         products = self.queryset.filter(category_id=category_id).annotate(
             is_favorite=Exists(favorites)
-        )
+        ).order_by('price')
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
