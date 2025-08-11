@@ -9,3 +9,12 @@ toogle_favorite_product = openapi.Schema(
                 'product_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Product ID'),
             },
 )
+
+product_by_name = [
+    openapi.Parameter(
+        'name',
+        openapi.IN_QUERY,
+        description="Name of the product to search for",
+        type=openapi.TYPE_STRING
+    )
+]
