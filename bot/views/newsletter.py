@@ -16,6 +16,7 @@ class NewsletterView(View):
         text = data.get('text')
         inline_buttons = data.get('inline_buttons', [])
         keyboard_buttons = data.get('keyboard_buttons', [])
+        location = data.get('location', None)
         reply_markup = None
         if inline_buttons:
             reply_markup = InlineKeyboardMarkup(inline_buttons)
@@ -25,7 +26,8 @@ class NewsletterView(View):
         await application.update_queue.put(NewsletterUpdate(
                     user_id=int(user_id),
                     text=text,
-                    reply_markup=reply_markup
+                    reply_markup=reply_markup,
+                    location=location
                 ))
         
         return JsonResponse({"status": "success", "message": "Newsletter sent successfully."})

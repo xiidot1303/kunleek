@@ -8,14 +8,18 @@ from asgiref.sync import async_to_sync
 
 
 @shared_task
-def send_newsletter_api(bot_user_id: int, text: str, inline_buttons=None, keyboard_buttons=None):
+def send_newsletter_api(
+        bot_user_id: int, text: str = None, inline_buttons=None, keyboard_buttons=None,
+        location: dict = None
+    ):
     # get current host
     API_URL = f"{WEBHOOK_URL}/send-newsletter/"
     data = {
         "user_id": bot_user_id,
         "text": text,
         "inline_buttons": inline_buttons or [],
-        "keyboard_buttons": keyboard_buttons or []
+        "keyboard_buttons": keyboard_buttons or [],
+        "location": location or None
     }
     requests.post(API_URL, json=data)
 
@@ -58,6 +62,8 @@ def send_order_info_to_group(order_id: int):
     )
 
     send_newsletter_api(bot_user_id=GROUP_ID, text=text)
+    location = {"latitude": order.latitude, "longitude": order.longitude}
+    send_newsletter_api(bot_user_id=GROUP_ID, location=location)
 
 
 @shared_task

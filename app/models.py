@@ -96,6 +96,8 @@ class Order(models.Model):
     delivery_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена доставки")
     total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Итоговая сумма")
     notes = models.TextField(blank=True, null=True, verbose_name="Заметки")
+    latitude = models.FloatField(null=True, blank=True, verbose_name="Широта")
+    longitude = models.FloatField(null=True, blank=True, verbose_name="Долгота")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     payed = models.BooleanField(default=False, verbose_name="Оплачено")
     payment_system = models.CharField(max_length=50, blank=True, null=True, verbose_name="Платежная система")
