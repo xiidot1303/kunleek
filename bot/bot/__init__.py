@@ -1,5 +1,5 @@
 from bot import *
-from telegram import Update
+from telegram import Update, MenuButtonWebApp
 from telegram.ext import ContextTypes, CallbackContext, ExtBot, Application
 from dataclasses import dataclass
 from asgiref.sync import sync_to_async
@@ -29,6 +29,8 @@ async def main_menu(update: Update, context: CustomContext):
         ],
     ]
 
+    webapp = WebAppInfo(url=f"{WEBAPP_URL}")
+
     markup = ReplyKeyboardMarkup(
         keyboard=buttons,
         resize_keyboard=True,
@@ -40,4 +42,10 @@ async def main_menu(update: Update, context: CustomContext):
         reply_markup=markup,
     )
 
-    await check_username(update)
+    menu_button = MenuButtonWebApp(
+        text=context.words.catalog,
+        web_app=webapp
+    )
+    await context.bot.set_chat_menu_button(
+        context._user_id, menu_button=menu_button
+    )
