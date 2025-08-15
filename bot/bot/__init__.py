@@ -22,10 +22,19 @@ async def is_message_back(update: Update):
 async def main_menu(update: Update, context: CustomContext):
     update = update.callback_query if update.callback_query else update
     bot = context.bot
+    buttons = [
+        [Strings(update.effective_user.id).loyalty_card],
+    ]
+
+    markup = ReplyKeyboardMarkup(
+        keyboard=buttons,
+        resize_keyboard=True,
+    )
 
     await bot.send_message(
         update.message.chat_id,
         context.words.main_menu,
+        reply_markup=markup,
     )
 
     await check_username(update)

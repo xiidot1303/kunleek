@@ -13,6 +13,7 @@ class Bot_user(models.Model):
         (1, 'ru'),
     ]
     card = models.CharField(null=True, blank=True, max_length=32, verbose_name='Номер карты')
+    card_file = models.FileField(null=True, blank=True, upload_to="bot/card/", verbose_name='Фото карты')
     lang = models.IntegerField(null=True, blank=True, choices=LANG_CHOICES, default=0, verbose_name='Язык')
     date = models.DateTimeField(db_index=True, null=True, auto_now_add=True, blank=True, verbose_name='Дата регистрации')
 

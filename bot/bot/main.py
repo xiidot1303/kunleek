@@ -4,11 +4,12 @@ import logging
 import traceback
 import html
 from django.db import close_old_connections
+from bot.services.barcode_service import generate_barcode
 
 
 async def start(update: Update, context: CustomContext):
     if await is_group(update):
-        return 
+        return
 
     if await is_registered(update.message.chat.id):
         # some functions
@@ -22,6 +23,24 @@ async def start(update: Update, context: CustomContext):
             ),
         )
         return SELECT_LANG
+
+
+async def loyalty_card(update: Update, context: CustomContext):
+    bot_user = await get_object_by_update(update)
+
+    # check that barcode image exists
+    if not bot_user.card_file:
+        file_name, content_file = await generate_barcode(
+            user_id=bot_user.user_id, barcode=bot_user.card
+        )
+        await sync_to_async(bot_user.card_file.save)(file_name, content_file, save=True)
+        await bot_user.asave()
+
+    await update.message.reply_photo(
+        photo=bot_user.card_file,
+        caption=bot_user.card,
+        parse_mode=ParseMode.HTML
+    )
 
 
 async def newsletter_update(update: NewsletterUpdate, context: CustomContext):
@@ -84,7 +103,6 @@ async def error_handler(update: Update, context: CustomContext):
     if "connection already closed" in str(context.error):
         await sync_to_async(close_old_connections)()
         return
-
 
     """Log the error and send a telegram message to notify the developer."""
     # Log the error before we do anything else, so we can see it even if something breaks.
