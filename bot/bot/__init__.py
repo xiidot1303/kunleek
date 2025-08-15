@@ -23,7 +23,10 @@ async def main_menu(update: Update, context: CustomContext):
     update = update.callback_query if update.callback_query else update
     bot = context.bot
     buttons = [
-        [Strings(update.effective_user.id).loyalty_card],
+        [
+            Strings(update.effective_user.id).loyalty_card,
+            Strings(update.effective_user.id).balance
+        ],
     ]
 
     markup = ReplyKeyboardMarkup(

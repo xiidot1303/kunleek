@@ -5,6 +5,7 @@ import traceback
 import html
 from django.db import close_old_connections
 from bot.services.barcode_service import generate_barcode
+from app.services.billz_service import BillzService, ClientDetails, APIMethods
 
 
 async def start(update: Update, context: CustomContext):
@@ -39,6 +40,20 @@ async def loyalty_card(update: Update, context: CustomContext):
     await update.message.reply_photo(
         photo=bot_user.card_file,
         caption=bot_user.card,
+        parse_mode=ParseMode.HTML
+    )
+
+
+async def balance(update: Update, context: CustomContext):
+    bot_user = await get_object_by_update(update)
+    billz_service = BillzService(APIMethods.customer)
+    client: ClientDetails = await sync_to_async(billz_service.get_client_by_id)(bot_user.billz_id)
+    balance = client.balance
+    if balance is None:
+        balance = 0
+
+    await update.message.reply_text(
+        context.words.your_balance.format(balance=balance),
         parse_mode=ParseMode.HTML
     )
 

@@ -98,17 +98,17 @@ class Strings:
 
     loyalty_card = [
         "💳 Sodiqlik kartam",
-        "💳 Моя карта лояльности"
+        "💳 Карта лояльности"
     ]
 
-    _ = [
-        "",
-        ""
+    your_balance = [
+        "Sizning balansingiz: <b>{balance} so'm</b>",
+        "Ваш баланс: <b>{balance} сум</b>"
     ]
 
-    _ = [
-        "",
-        ""
+    balance = [
+        "💰 Balans",
+        "💰 Баланс"
     ]
 
     _ = [

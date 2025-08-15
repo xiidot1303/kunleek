@@ -41,8 +41,14 @@ loyalty_card_handler = MessageHandler(
     main.loyalty_card
 )
 
+balance_handler = MessageHandler(
+    filters.Text(Strings.balance) & exceptions_for_filter_text,
+    main.balance
+)
+
 handlers = [
     login_handler,
     loyalty_card_handler,
+    balance_handler,
     TypeHandler(type=NewsletterUpdate, callback=main.newsletter_update)
 ]
