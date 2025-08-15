@@ -91,3 +91,10 @@ class FavoriteProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteProduct
         fields = ['id', 'user', 'product']
+
+
+class BotUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bot_user
+        fields = '__all__'
+        read_only_fields = ['date', 'user_id']

@@ -94,6 +94,7 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=50, verbose_name="Метод оплаты")
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма")
     delivery_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена доставки")
+    bonus_used = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Использованные бонусы")
     total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Итоговая сумма")
     notes = models.TextField(blank=True, null=True, verbose_name="Заметки")
     latitude = models.FloatField(null=True, blank=True, verbose_name="Широта")
