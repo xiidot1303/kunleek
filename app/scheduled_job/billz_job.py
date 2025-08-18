@@ -3,6 +3,7 @@ import requests
 from django.core.cache import cache
 from app.services.category_service import *
 from app.services.product_service import *
+from app.services.client_service import *
 from app.services.billz_service import BillzService, APIMethods
 
 def fetch_and_cache_access_token():
@@ -36,14 +37,14 @@ def fetch_products():
         page += 1
 
 
-def fetch_clients():
-    billz_service = BillzService(method=APIMethods.clients)
-    page = 1
-    while True:
-        clients = billz_service.fetch_clients(page=page)
-        if clients:=clients:
-            create_client_from_billz(clients)
-        else:
-            break
+# def fetch_clients():
+#     billz_service = BillzService(method=APIMethods.clients)
+#     page = 1
+#     while True:
+#         clients = billz_service.fetch_clients(page=page)
+#         if clients:=clients:
+#             create_client_from_billz(clients)
+#         else:
+#             break
         
-        page += 1
+#         page += 1

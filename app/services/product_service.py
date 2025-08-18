@@ -1,4 +1,5 @@
 from app.models import Product, Category
+from config import BILLZ_SHOP_ID as shop_id
 
 
 def create_product_from_billz(product_data):
@@ -15,7 +16,7 @@ def create_product_from_billz(product_data):
         # get quantity
         quantity = None
         for shop_measurement in product.get("shop_measurement_values", []):
-            if shop_measurement['shop_id'] == "e1adc82b-5a22-4bbb-a1d5-0b3fe49f89da":
+            if shop_measurement['shop_id'] == shop_id:
                 quantity = shop_measurement['active_measurement_value']
                 break
         if not quantity:
@@ -23,7 +24,7 @@ def create_product_from_billz(product_data):
         # get price
         price = None
         for shop_price in product.get("shop_prices", []):
-            if shop_price['shop_id'] == "e1adc82b-5a22-4bbb-a1d5-0b3fe49f89da":
+            if shop_price['shop_id'] == shop_id:
                 price = shop_price['retail_price']
                 break
         if not price:

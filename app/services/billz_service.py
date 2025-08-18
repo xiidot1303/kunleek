@@ -1,4 +1,4 @@
-from config import BILLZ_SECRET_TOKEN
+from config import BILLZ_SECRET_TOKEN, BILLZ_SHOP_ID
 import requests
 from django.core.cache import cache
 from app.services import *
@@ -10,6 +10,8 @@ class APIMethods:
     clients = "v1/client"
     customer = "v1/customer"
     client_card = "v1/client-card"
+    create_order = "v1/orders"
+
 
 class ClientDetails:
     id = None
@@ -18,14 +20,15 @@ class ClientDetails:
     card = None
     balance = 0
 
+
 class BillzService:
     url = "https://api-admin.billz.ai/"
 
     def __init__(self, method):
         self.method = method
-        self.access_token = cache.get("billz_access_token") or self.fetch_and_cache_access_token()
+        self.access_token = cache.get(
+            "billz_access_token") or self.fetch_and_cache_access_token()
         self.headers = {"Authorization": f"Bearer {self.access_token}"}
-        
 
     @staticmethod
     def fetch_and_cache_access_token():
@@ -44,21 +47,21 @@ class BillzService:
         response = requests.get(url, headers=self.headers)
         response_data = response.json()
         return response_data.get("categories", [])
-    
+
     def fetch_products(self, page=1):
         url = f"{self.url}{APIMethods.products}"
         params = {"page": page}
         response = requests.get(url, headers=self.headers, params=params)
         response_data = response.json()
         return response_data.get("products", [])
-    
+
     def fetch_clients(self, page=1):
         url = f"{self.url}{APIMethods.clients}"
         params = {"page": page}
         response = requests.get(url, headers=self.headers, params=params)
         response_data = response.json()
         return response_data.get("clients", [])
-    
+
     def get_client_by_phone_number(self, phone_number) -> ClientDetails | None:
         url = f"{self.url}{APIMethods.clients}"
         params = {"phone_number": phone_number}
@@ -69,9 +72,10 @@ class BillzService:
             return None
         data = data[0]
         client_details: ClientDetails = DictToClass(data)
-        client_details.card = data.get("cards", [])[0] if data.get("cards") else None
+        client_details.card = data.get(
+            "cards", [])[0] if data.get("cards") else None
         return client_details
-    
+
     def create_client(self, chat_id, first_name, phone_number) -> ClientDetails | None:
         url = f"{self.url}{APIMethods.clients}"
         payload = {
@@ -83,7 +87,7 @@ class BillzService:
         response_data = response.json()
         id = response_data.get("id")
         return id
-    
+
     def get_client_by_id(self, client_id) -> ClientDetails | None:
         url = f"{self.url}{APIMethods.customer}/{client_id}"
         response = requests.get(url, headers=self.headers)
@@ -92,10 +96,11 @@ class BillzService:
         client_details.id = response_data.get("id")
         client_details.first_name = response_data.get("first_name")
         client_details.last_name = response_data.get("last_name")
-        client_details.card = response_data.get("cards", [])[0]['code'] if response_data.get("cards") else None
+        client_details.card = response_data.get(
+            "cards", [])[0]['code'] if response_data.get("cards") else None
         client_details.balance = response_data.get("balance", 0)
         return client_details
-    
+
     def create_client_card(self, client_id):
         url = f"{self.url}{APIMethods.client_card}"
         payload = {
@@ -104,3 +109,91 @@ class BillzService:
         response = requests.post(url, headers=self.headers, json=payload)
         response_data = response.json()
         return response_data["card_code"]
+
+    def create_order(self):
+        url = f"{self.url}{APIMethods.create_order}"
+        data = {
+            "method": "order.create",
+            "params": {
+                "shop_id": BILLZ_SHOP_ID
+            }
+        }
+        response = requests.post(url, headers=self.headers, json=data)
+        response_data = response.json()
+        order_id = response_data.get("result")
+        self.order_id = order_id
+        return order_id
+
+    def add_product_to_order(self, product_id, quantity):
+        url = f"{self.url}v2/order-product/{self.order_id}"
+        data = {
+            "sold_measurement_value": quantity,
+            "product_id": product_id,
+            "used_wholesale_price": False,
+            "is_manual": False,
+            "response_type": "HTTP"
+        }
+
+        response = requests.post(url, headers=self.headers, json=data)
+        response_data = response.json()
+        return response_data
+
+    def make_discount(self, amount):
+        url = f"{self.url}v2/order-manual-discount/{self.order_id}"
+        data = {
+            "discount_unit": "CURRENCY",
+            "discount_value": amount,
+        }
+
+        response = requests.post(url, headers=self.headers, json=data)
+        response_data = response.json()
+        return response_data
+
+    def bind_client_to_order(self, client_id):
+        url = f"{self.url}v2/order-customer-new/{self.order_id}?Billz-Response-Channel=HTTP"
+        data = {
+            "customer_id": client_id,
+            "check_auth_code": False
+        }
+
+        response = requests.post(url, headers=self.headers, json=data)
+        response_data = response.json()
+        return response_data
+
+    def complete_order(self, paid_amount, payment_method):
+        payment_types_by_method = {
+            "cash": {
+                "id": "f1bbdf7d-58e7-43bd-86ec-91ddf8193311",
+                "name": "Наличные"
+
+            },
+            "payme": {
+                "id": "49677309-d2c4-4dd8-8e9f-c9d05776ef71",
+                "name": "Payme"
+            },
+            "click": {
+                "id": "6f443ced-4915-4336-b177-c37e5738110e",
+                "name": "Терминал"
+            }
+        }
+        url = f"{self.url}v2/order-payment/{self.order_id}"
+        data = {
+            "payments": [
+                {
+                    "company_payment_type_id": payment_types_by_method[payment_method]["id"],
+                    "paid_amount": paid_amount,
+                    "company_payment_type": {
+                        "name": payment_types_by_method[payment_method]["name"]
+                    },
+                    "returned_amount": 0
+                },
+            ],
+            "comment": "Telegra bot order",
+            "with_cashback": 1,
+            "without_cashback": False,
+            "skip_ofd": False
+        }
+
+        response = requests.post(url, headers=self.headers, json=data)
+        response_data = response.json()
+        return response_data
