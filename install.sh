@@ -1,4 +1,5 @@
 #!/bin/bash
+pip install -r requirements.txt
 
 mkdir logs
 
@@ -31,7 +32,6 @@ sed -i "s/<csrf_trusted_origins>/$domain/g" ".env"
 
 createdb $project_title
 
-pip install -r requirements.txt
 
 python manage.py migrate --skip-checks
 python manage.py makemigrations app
