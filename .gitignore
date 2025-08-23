@@ -20,3 +20,4 @@ app/static/assets/*
 !bot/__init__.py
 !core/__init__.py
 enter_server.sh
+ssh.pem
