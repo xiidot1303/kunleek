@@ -15,6 +15,8 @@ echo "Bot token: "
 read bot_token
 echo "Project port"
 read port
+echo "Bot port"
+read bot_port
 echo "Project domain"
 read domain
 
@@ -46,6 +48,7 @@ sed -i "s/<title>/$project_title/g" "conf/supervisor.conf"
 sed -i "s/<folder>/$project_title/g" "conf/supervisor.conf"
 sed -i "s/<user>/$user/g" "conf/supervisor.conf"
 sed -i "s/<port>/$port/g" "conf/supervisor.conf"
+sed -i "s/<bot_port>/$bot_port/g" "conf/supervisor.conf"
 sudo cp conf/supervisor.conf /etc/supervisor/conf.d/$project_title.conf
 sudo supervisorctl reread
 sudo supervisorctl update
@@ -54,6 +57,8 @@ sed -i "s/<domain>/$domain/g" "conf/nginx.conf"
 sed -i "s/<user>/$user/g" "conf/nginx.conf"
 sed -i "s/<folder>/$project_title/g" "conf/nginx.conf"
 sed -i "s/<port>/$port/g" "conf/nginx.conf"
+sed -i "s/<bot_port>/$bot_port/g" "conf/nginx.conf"
+sed -i "s/<bot_token>/$bot_token/g" "conf/nginx.conf"
 sudo cp conf/nginx.conf /etc/nginx/sites-enabled/$project_title.conf
 sudo nginx -t
 echo "Continue?"

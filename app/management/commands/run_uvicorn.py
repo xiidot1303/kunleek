@@ -10,7 +10,7 @@ import signal
 import uvicorn
 import asyncio
 from bot.control.updater import application
-from config import PORT
+from config import BOT_PORT as PORT
 
 # This function will be called when a shutdown signal is received
 def handle_shutdown(signal, frame):
