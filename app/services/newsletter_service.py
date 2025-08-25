@@ -5,6 +5,8 @@ from app.models import Order
 from bot.models import Bot_user
 from bot import Strings
 from asgiref.sync import async_to_sync
+from payment.services import get_invoice_url
+
 
 
 @shared_task
@@ -91,9 +93,6 @@ def send_invoice_to_user(order_id):
         total=order.total,
         items=items_text
     )
-
-    def get_invoice_url(order_id, total, payment_method):
-        return f"{WEBHOOK_URL}/pay-invoice/{order_id}/{total}/{payment_method}/"
 
     inline_buttons = [
         [{
