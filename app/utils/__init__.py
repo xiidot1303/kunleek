@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 import requests
 import json
 import aiohttp
+import uuid
 
 
 async def get_user_ip(request):
@@ -26,6 +27,12 @@ async def time_now():
 async def today():
     today = date.today()
     return today
+
+
+async def create_random_id():
+    # this creates random 10 digit id
+    random_id = uuid.uuid4().int >> 96
+    return random_id
 
 
 async def send_request(url, data=None, headers=None, type='get') -> dict:

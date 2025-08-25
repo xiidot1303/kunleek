@@ -40,6 +40,8 @@ class Product(models.Model):
     )
     sku = models.CharField(null=True, blank=True, max_length=100, verbose_name="SKU")
     quantity = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=0, verbose_name="Quantity")
+    mxik = models.CharField(max_length=100, null=True, verbose_name="MXIK")
+    package_code = models.CharField(max_length=100, null=True, verbose_name="Код упаковки")
     
     
     def __str__(self):

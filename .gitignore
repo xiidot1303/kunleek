@@ -4,6 +4,7 @@ db.sqlite3
 __pycache__/
 app/migrations
 bot/migrations
+payment/migrations
 **/__init__.py
 __init__.py
 files
@@ -19,5 +20,10 @@ app/static/assets/*
 !bot/bot/__init__.py
 !bot/__init__.py
 !core/__init__.py
+!payment/resources/__init__.py
+!payment/services/__init__.py
+!payment/utils/__init__.py
+!payment/services/click/__init__.py
+!payment/services/payme/__init__.py
 enter_server.sh
 ssh.pem
