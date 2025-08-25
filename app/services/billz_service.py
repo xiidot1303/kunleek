@@ -76,7 +76,7 @@ class BillzService:
             "cards", [])[0] if data.get("cards") else None
         return client_details
 
-    def create_client(self, chat_id, first_name, phone_number) -> ClientDetails | None:
+    def create_client(self, chat_id, first_name, phone_number) -> str:
         url = f"{self.url}{APIMethods.clients}"
         payload = {
             "first_name": first_name,

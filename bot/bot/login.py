@@ -107,6 +107,7 @@ async def connect_billz_client_job(context: CustomContext):
     # get client details from billz
     billz_service = BillzService(APIMethods.clients)
     client_details: ClientDetails = await sync_to_async(billz_service.get_client_by_phone_number)(bot_user.phone)
+
     if not client_details:
         # create new client in billz
         client_id = await sync_to_async(billz_service.create_client)(
@@ -115,14 +116,14 @@ async def connect_billz_client_job(context: CustomContext):
             phone_number=bot_user.phone
         )
 
-        client_details = await sync_to_async(billz_service.get_client_by_id)(client_id)
+        client_details: ClientDetails = await sync_to_async(billz_service.get_client_by_id)(client_id)
 
     bot_user.name = f"{client_details.first_name} {client_details.last_name}"
     bot_user.billz_id = client_details.id
 
     # create new card if not exist
     if not client_details.card:
-        card_code = await sync_to_async(billz_service.create_client)(client_id)
+        card_code = await sync_to_async(billz_service.create_client_card)(client_details.id)
         client_details.card = card_code
     bot_user.card = client_details.card
     await bot_user.asave()
