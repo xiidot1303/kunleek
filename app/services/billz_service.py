@@ -142,7 +142,7 @@ class BillzService:
         url = f"{self.url}v2/order-manual-discount/{self.order_id}"
         data = {
             "discount_unit": "CURRENCY",
-            "discount_value": amount,
+            "discount_value": int(amount),
         }
 
         response = requests.post(url, headers=self.headers, json=data)
@@ -156,11 +156,11 @@ class BillzService:
             "check_auth_code": False
         }
 
-        response = requests.post(url, headers=self.headers, json=data)
+        response = requests.put(url, headers=self.headers, json=data)
         response_data = response.json()
         return response_data
 
-    def complete_order(self, paid_amount, payment_method):
+    def complete_order(self, paid_amount, payment_method, with_cashback=0):
         payment_types_by_method = {
             "cash": {
                 "id": "f1bbdf7d-58e7-43bd-86ec-91ddf8193311",
@@ -181,7 +181,7 @@ class BillzService:
             "payments": [
                 {
                     "company_payment_type_id": payment_types_by_method[payment_method]["id"],
-                    "paid_amount": paid_amount,
+                    "paid_amount": int(paid_amount),
                     "company_payment_type": {
                         "name": payment_types_by_method[payment_method]["name"]
                     },
@@ -189,7 +189,7 @@ class BillzService:
                 },
             ],
             "comment": "Telegra bot order",
-            "with_cashback": 1,
+            "with_cashback": int(with_cashback),
             "without_cashback": False,
             "skip_ofd": False
         }
