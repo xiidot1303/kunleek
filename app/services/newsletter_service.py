@@ -14,6 +14,14 @@ def send_newsletter_api(
         bot_user_id: int, text: str = None, inline_buttons=None, keyboard_buttons=None,
         location: dict = None
     ):
+    """
+    inline_buttons = [
+        [{
+            "text": <text of the button>,
+            "url": <url> | "callback_data": <data> | "switch_inline_query": <query>
+        }]
+    ]
+    """
     # get current host
     API_URL = f"{WEBHOOK_URL}/send-newsletter/"
     data = {
