@@ -3,21 +3,27 @@ from django.db import models
 
 class Category(models.Model):
     billz_id = models.CharField(max_length=128, null=True, verbose_name="ID Billz")
-    name = models.CharField(max_length=100, null=True, verbose_name="Name")
-    name_uz = models.CharField(max_length=100, blank=True, null=True, verbose_name="Name in Uzbek")
-    name_ru = models.CharField(max_length=100, blank=True, null=True, verbose_name="Name in Russian")
+    name = models.CharField(max_length=100, null=True, verbose_name="Название")
+    name_uz = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на узбекском")
+    name_ru = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на русском")
     parent_category = models.ForeignKey(
         'self',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='subcategories'
+        related_name='subcategories',
+        verbose_name="Родительская категория"
     )
-    photo = models.FileField(null=True, blank=True, upload_to='category/photos/', verbose_name="Photo")
-    index = models.IntegerField(default=0, help_text="Order of the category in the list")
+    photo = models.FileField(null=True, blank=True, upload_to='category/photos/', verbose_name="Фото")
+    index = models.IntegerField(default=0, help_text="Порядок категории в списке")
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+        ordering = ['index']
 
 
 class Product(models.Model):
@@ -25,27 +31,33 @@ class Product(models.Model):
         Category,
         on_delete=models.CASCADE,
         related_name='products',
-        verbose_name="Category"
+        verbose_name="Категория"
     )
     billz_id = models.CharField(max_length=128, unique=True, null=True, verbose_name="ID Billz")
-    name = models.CharField(max_length=100)
-    name_uz = models.CharField(max_length=100, blank=True, null=True)
-    name_ru = models.CharField(max_length=100, blank=True, null=True)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    photo = models.URLField(null=True, blank=True, verbose_name="Photo URL")
+    name = models.CharField(max_length=100, verbose_name="Название")
+    name_uz = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на узбекском")
+    name_ru = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на русском")
+    description = models.TextField(verbose_name="Описание")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
+    photo = models.URLField(null=True, blank=True, verbose_name="URL фото")
     photos = models.JSONField(
         default=list,
-        help_text="List of photo URLs for the product"
+        help_text="Список URL фото для продукта",
+        verbose_name="Фото (список URL)"
     )
-    sku = models.CharField(null=True, blank=True, max_length=100, verbose_name="SKU")
-    quantity = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=0, verbose_name="Quantity")
-    mxik = models.CharField(max_length=100, null=True, verbose_name="MXIK")
+    sku = models.CharField(null=True, blank=True, max_length=100, verbose_name="Артикул (SKU)")
+    quantity = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=0, verbose_name="Количество")
+    mxik = models.CharField(max_length=100, null=True, verbose_name="МХИК")
     package_code = models.CharField(max_length=100, null=True, verbose_name="Код упаковки")
     
     
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = "Продукт"
+        verbose_name_plural = "Продукты"
+        ordering = ['name']
     
 
 class FavoriteProduct(models.Model):

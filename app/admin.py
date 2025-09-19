@@ -4,19 +4,20 @@ from app.models import *
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'billz_id', 'parent_category', 'index')
+    list_display = ('name', 'name_uz', 'name_ru', 'index', 'parent_category', 'photo')
     search_fields = ('name', 'billz_id')
     list_filter = ('parent_category',)
     ordering = ('index',)
+    list_editable = ('index', 'name_uz', 'name_ru',)
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'sku')
+    list_display = ('name', 'category', 'price', 'name_uz', 'name_ru', 'mxik', 'package_code')
     search_fields = ('name', 'sku')
     list_filter = ('category',)
     ordering = ('name',)
-    list_editable = ('price', 'sku')
+    list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code')
 
 @admin.register(DeliveryType)
 class DeliveryTypeAdmin(admin.ModelAdmin):
@@ -48,3 +49,4 @@ class FavoriteProductAdmin(admin.ModelAdmin):
     search_fields = ('user__name', 'product__name')
     list_filter = ('user',)
     ordering = ('user',)
+

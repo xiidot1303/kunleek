@@ -10,9 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+
 from pathlib import Path
 from config import *
 from corsheaders.defaults import default_headers
+
+# Jazzmin admin panel customization
+JAZZMIN_SETTINGS = {
+    "site_title": "Kunleek admin",
+    "site_header": "Kunleek admin",
+    "site_brand": "Kunleek admin",
+    "welcome_sign": "Welcome to Kunleek admin",
+}
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -153,7 +162,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'Asia/Tashkent'
 
