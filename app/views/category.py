@@ -12,6 +12,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
         """
         Override the list method to return categories with their subcategories.
         """
-        queryset = self.get_queryset().filter(parent_category__isnull=True).order_by('-index')
+        queryset = self.get_queryset().filter(parent_category__isnull=True).order_by('index')
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
