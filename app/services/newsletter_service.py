@@ -105,7 +105,7 @@ def send_invoice_to_user(order_id):
     inline_buttons = [
         [{
             "text": strings.pay,
-            "url": get_invoice_url(order.pk, order.total, order.payment_method)
+            "url": async_to_sync(get_invoice_url)(order.pk, order.total, order.payment_method)
         }]
     ]
 
