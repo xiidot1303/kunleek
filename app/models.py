@@ -69,6 +69,12 @@ class DeliveryType(models.Model):
     title_uz = models.CharField(max_length=255, null=True, verbose_name="Название (узбекский)")
     title_ru = models.CharField(max_length=255, null=True, verbose_name="Название (русский)")
     price = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Цена")
+    description = models.TextField(null=True, blank=True, verbose_name="Описание")
+    TYPE_CHOICES = [
+        ('express_yandex', 'Yandex'),
+        ('during_day', 'В течение дня'),
+    ]
+    type = models.CharField(max_length=100, null=True, choices=TYPE_CHOICES, verbose_name="Тип")
 
     class Meta:
         verbose_name = "Тип доставки"
@@ -111,6 +117,7 @@ class Order(models.Model):
     bonus_used = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Использованные бонусы")
     total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Итоговая сумма")
     notes = models.TextField(blank=True, null=True, verbose_name="Заметки")
+    address = models.CharField(max_length=255, null=True, blank=True, verbose_name="Адрес доставки")
     latitude = models.FloatField(null=True, blank=True, verbose_name="Широта")
     longitude = models.FloatField(null=True, blank=True, verbose_name="Долгота")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")

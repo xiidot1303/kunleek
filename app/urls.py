@@ -14,6 +14,7 @@ from app.views.banner import BannerViewSet
 from app.views.order import OrderViewSet, OrderItemViewSet
 from app.views.favorite_product import FavoriteProductViewSet
 from app.views.client import BotUserViewSet
+from app.views.yandex_delivery import YandexDeliveryView
 
 
 router = DefaultRouter()
@@ -61,4 +62,6 @@ urlpatterns = [
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+    path('yandex-delivery-callback', YandexDeliveryView.as_view(), name='yandex-delivery-callback'),
 ]
