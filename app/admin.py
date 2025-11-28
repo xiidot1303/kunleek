@@ -1,5 +1,23 @@
 from django.contrib import admin
 from app.models import *
+from django.urls import path
+from django.contrib import messages
+from django.shortcuts import redirect
+
+
+def fetch_categories_manually(request):
+    from app.scheduled_job.billz_job import fetch_categories
+    fetch_categories()
+    messages.success(request, "Категории успешно обновлены!")
+    return redirect("../")
+
+
+def fetch_products_manually(request):
+    from app.scheduled_job.billz_job import fetch_products
+    fetch_products()
+    messages.success(request, "Продукты успешно обновлены!")
+    return redirect("../")
+
 
 
 @admin.register(Category)
@@ -12,6 +30,16 @@ class CategoryAdmin(admin.ModelAdmin):
     list_editable = ('index', 'name_uz', 'name_ru',)
 
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path("fetch-categories-manually/", self.admin_site.admin_view(fetch_products_manually),
+                 name="fetch_categories_manually"),
+        ]
+        return custom_urls + urls
+
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'name_uz',
@@ -20,6 +48,14 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('category',)
     ordering = ('name',)
     list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path("fetch-products-manually/", self.admin_site.admin_view(fetch_products_manually),
+                 name="fetch_products_manually"),
+        ]
+        return custom_urls + urls
 
 
 @admin.register(DeliveryType)
