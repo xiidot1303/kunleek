@@ -99,8 +99,8 @@ def create_claim(order_id: int):
 
     else:
         # Handle error
-        pass
-
+        print(response.json())
+    
 
 def check_price(latitude: float, longitude: float):
     data = {
