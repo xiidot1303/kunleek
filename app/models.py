@@ -47,8 +47,8 @@ class Product(models.Model):
     )
     sku = models.CharField(null=True, blank=True, max_length=100, verbose_name="Артикул (SKU)")
     quantity = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=0, verbose_name="Количество")
-    mxik = models.CharField(max_length=100, null=True, verbose_name="МХИК")
-    package_code = models.CharField(max_length=100, null=True, verbose_name="Код упаковки")
+    mxik = models.CharField(max_length=100, null=True, blank=True, verbose_name="МХИК")
+    package_code = models.CharField(max_length=100, null=True, blank=True, verbose_name="Код упаковки")
     
     
     def __str__(self):
