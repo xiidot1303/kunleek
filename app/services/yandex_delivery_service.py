@@ -1,18 +1,25 @@
 from celery import shared_task
-from app.models import Order
+from app.models import Order, YandexTrip
 from app.services import *
 from config import YANDEX_DELIVERY_API_KEY, YANDEX_DELIVERY_URL, YANDEX_DELIVERY_CALLBACK_URL
+
+class PerformerInfo(DictToClass):
+    courier_name: str
+    car_model: str
+    car_color: str
+    car_number: str
+
+
+headers = {
+    "Authorization": f"Bearer {YANDEX_DELIVERY_API_KEY}",
+    "Content-Type": "application/json",
+    "Accept-Language": "ru"
+}
 
 
 @shared_task
 def create_claim(order_id: int):
     order: Order = Order.objects.get(id=order_id)
-    # Prepare headers
-    headers = {
-        "Authorization": f"Bearer {YANDEX_DELIVERY_API_KEY}",
-        "Content-Type": "application/json",
-        "Accept-Language": "ru"
-    }
     # Prepare data for Yandex Delivery API
     data = {
         "items": [
@@ -43,7 +50,7 @@ def create_claim(order_id: int):
             {
                 "address": {
                     "fullname": f"{order.address}",
-                    "coordinates": [order.latitude, order.longitude]
+                    "coordinates": [order.longitude, order.latitude]
                 },
                 "contact": {
                     "name": order.customer.first_name,
@@ -81,9 +88,70 @@ def create_claim(order_id: int):
         json=data
     )
     if claim_id := response.json().get("id"):
-        # order.status = "yandex_claim_created"
-        # order.save(update_fields=["status"])
-        1
+        order.status = "yandex_claim_created"
+        order.save(update_fields=["status"])
+        # create YandexTrip
+        YandexTrip.objects.create(
+            order=order,
+            claim_id=claim_id,
+            status="new"
+        )
+
     else:
         # Handle error
         pass
+
+
+def check_price(latitude: float, longitude: float):
+    data = {
+        "route_points": [
+            {
+                "coordinates": [69.191207, 41.342409],
+                "type": "source",
+                "id": 1
+            },
+            {
+                "coordinates": [longitude, latitude],
+                "id": 2
+            }
+        ],
+        "requirements": {
+            "taxi_class": "express"
+        }
+    }
+
+    response = requests.post(
+        f"{YANDEX_DELIVERY_URL}/b2b/cargo/integration/v2/check-price",
+        headers=headers,
+        json=data
+    )
+    print(response.json())
+    price = response.json().get("price")
+
+    return price
+
+
+@shared_task
+def accept_order(claim_id):
+    data = {
+        "version": 1
+    }
+
+    response = requests.post(
+        f"{YANDEX_DELIVERY_URL}/b2b/cargo/integration/v2/claims/accept?claim_id={claim_id}",
+        headers=headers,
+        json=data
+    )
+
+    return response.json().get("status")
+
+
+def order_info(claim_id):
+    """
+    Response example: https://yandex.ru/support/delivery-profile/ru/api/express/openapi/IntegrationV2ClaimsInfo#responses
+    """
+    response = requests.post(
+        f"{YANDEX_DELIVERY_URL}/b2b/cargo/integration/v2/claims/info?claim_id={claim_id}",
+        headers=headers
+    )
+    return response.json()

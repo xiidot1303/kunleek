@@ -6,6 +6,7 @@ from bot.models import Bot_user
 from bot import Strings
 from asgiref.sync import async_to_sync
 from payment.services import get_invoice_url
+from bot.services.string_service import *
 
 
 
@@ -110,3 +111,65 @@ def send_invoice_to_user(order_id):
     ]
 
     send_newsletter_api(bot_user_id=bot_user.user_id, text=text, inline_buttons=inline_buttons)
+
+
+@shared_task
+def send_performer_info_to_client(yandex_trip: YandexTrip):
+    order: Order = yandex_trip.order
+    bot_user: Bot_user = order.bot_user
+    text = performer_info_string(bot_user, yandex_trip)
+    send_newsletter_api(
+        bot_user_id=bot_user.user_id,
+        text = text
+    )
+
+
+@shared_task
+def notify_admin_about_performer_arrived(yandex_trip_id):
+    yandex_trip: YandexTrip = YandexTrip.objects.get(pk=yandex_trip_id)
+    order: Order = yandex_trip.order
+    text = perfomer_arrived_pickup_string(yandex_trip)
+    send_newsletter_api(
+        bot_user_id=GROUP_ID,
+        text = text
+    )
+
+
+@shared_task
+def notify_client_delivery_arrived(yandex_trip_id):
+    yandex_trip: YandexTrip = YandexTrip.objects.get(pk=yandex_trip_id)
+    bot_user: Bot_user = yandex_trip.order.bot_user
+    text = Strings.delivery_arrived[bot_user.lang]
+    send_newsletter_api(
+        bot_user_id=bot_user.user_id,
+        text=text
+    )
+
+
+
+
+@shared_task
+def notify_admin_order_delivered(yandex_trip_id):
+    yandex_trip: YandexTrip = YandexTrip.objects.get(pk=yandex_trip_id)
+    order: Order = yandex_trip.order
+    text = Strings.order_delivered[0].format(
+        order_id = order.id
+    )
+    send_newsletter_api(
+        bot_user_id=GROUP_ID,
+        text = text
+    )
+
+
+
+
+@shared_task
+def send_gratitude_to_client(yandex_trip_id):
+    yandex_trip: YandexTrip = YandexTrip.objects.get(pk=yandex_trip_id)
+    bot_user: Bot_user = yandex_trip.order.bot_user
+    text = Strings.gratitude_to_client[bot_user.lang]
+    send_newsletter_api(
+        bot_user_id=bot_user.user_id,
+        text=text
+    )
+

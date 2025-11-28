@@ -77,7 +77,7 @@ class Strings:
 
 
     invoice_message = [
-        "🧾 <i>Buyurtma ma'lumotlari:</i>\n\n🆔 Buyurtma ID: {order_id}\n" \
+        "🧾 <i>Buyurtma ma'lumotlari:</i>\n\n🆔 Buyurtma ID: #{order_id}\n" \
             "👤 Mijoz: {customer_name}\n\n📦 Buyurtma:\n{items}\n\n💵 Jami: {subtotal} so'm\n🚚 " \
                 "Yetkazib berish: {delivery_price} so'm\n💰 Umumiy: {total} so'm\n\n" \
                     "<i>Buyurtmani tasdiqlash uchun to'lovni amalga oshiring.</i>",
@@ -116,14 +116,39 @@ class Strings:
         "🛒 Каталог"
     ]
 
-    _ = [
-        "",
-        ""
+    driver_info = [
+        """
+👤 Kuryer: {courier_name}
+🚖 Mashina: {car_color} {car_model} {car_number}
+""",
+        """
+👤 Курьер: {courier_name}
+🚖 Машина: {car_color} {car_model} {car_number}"""
     ]
 
-    _ = [
-        "",
-        ""
+    performer_found_for_your_order = [
+        "☑️  Sizning buyurtmangiz yandex yetkazib berish xizmati orqali yetkazib berilmoqda",
+        "☑️ Ваш заказ доставляется через службу Яндекс.Доставки."
+    ]
+
+    performer_arrived_pickup = [
+        "Kuryer buyurtmani qabul qilib olish uchun yetib keldi\nЗаказ #{order_id}",
+        "<b>Курьер прибыл.</b>\nЗаказ #{order_id}"
+    ]
+
+    delivery_arrived = [
+        "🛵 Kuryer manzilga yetib keldi, buyurtmani qabul qilib olishingiz mumkin",
+        "🛵 Курьер прибыл, можете забрать заказ."
+    ]
+
+    order_delivered = [
+        "Buyurtma #{order_id} muvaffaqiyatli yetkazib berildi",
+        "Заказ #{order_id} успешно доставлен"
+    ]
+
+    gratitude_to_client = [
+        "Buyurtmangiz uchun minnatdormiz 😊",
+        "Спасибо за ваш заказ 😊"
     ]
 
     _ = [

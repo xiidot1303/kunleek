@@ -14,7 +14,7 @@ from app.views.banner import BannerViewSet
 from app.views.order import OrderViewSet, OrderItemViewSet
 from app.views.favorite_product import FavoriteProductViewSet
 from app.views.client import BotUserViewSet
-from app.views.yandex_delivery import YandexDeliveryView
+from app.views.yandex_delivery import YandexDeliveryView, CheckPrice
 
 
 router = DefaultRouter()
@@ -64,4 +64,5 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     path('yandex-delivery-callback', YandexDeliveryView.as_view(), name='yandex-delivery-callback'),
+    path('yandex-delivery-check-price', CheckPrice.as_view(), name='yandex-delivery-check-price'),
 ]

@@ -27,3 +27,4 @@ app/static/assets/*
 !payment/services/payme/__init__.py
 enter_server.sh
 ssh.pem
+test_callback.json

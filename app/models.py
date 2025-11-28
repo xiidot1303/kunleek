@@ -146,3 +146,20 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name}"
+    
+
+class YandexTrip(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='yandex_trip', verbose_name="Заказ")
+    claim_id = models.CharField(max_length=255, verbose_name="ID поездки Yandex")
+    courier_name = models.CharField(null=True, blank=True, max_length=255)
+    car_color = models.CharField(null=True, blank=True, max_length=32)
+    car_model = models.CharField(null=True, blank=True, max_length=64)
+    car_number = models.CharField(null=True, blank=True, max_length=16)
+    status = models.CharField(max_length=100, verbose_name="Статус поездки")
+
+    class Meta:
+        verbose_name = "Поездка Yandex"
+        verbose_name_plural = "Поездки Yandex"
+
+    def __str__(self):
+        return f"Yandex Trip for Order {self.order.id}"

@@ -4,7 +4,8 @@ from app.models import *
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'name_uz', 'name_ru', 'index', 'parent_category', 'photo')
+    list_display = ('name', 'name_uz', 'name_ru',
+                    'index', 'parent_category', 'photo')
     search_fields = ('name', 'billz_id')
     list_filter = ('parent_category',)
     ordering = ('index',)
@@ -13,11 +14,13 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'name_uz', 'name_ru', 'mxik', 'package_code')
+    list_display = ('name', 'category', 'price', 'name_uz',
+                    'name_ru', 'mxik', 'package_code')
     search_fields = ('name', 'sku')
     list_filter = ('category',)
     ordering = ('name',)
     list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code')
+
 
 @admin.register(DeliveryType)
 class DeliveryTypeAdmin(admin.ModelAdmin):
@@ -31,14 +34,18 @@ class DeliveryTypeAdmin(admin.ModelAdmin):
 class BannerAdmin(admin.ModelAdmin):
     list_display = ('photo',)
 
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 1
 
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bot_user', 'customer', 'delivery_type', 'payment_method', 'subtotal', 'delivery_price', 'total', 'created_at')
-    search_fields = ('customer__first_name', 'delivery_type__title_en', 'payment_method')
+    list_display = ('id', 'bot_user', 'customer', 'delivery_type',
+                    'payment_method', 'subtotal', 'delivery_price', 'total', 'created_at')
+    search_fields = ('customer__first_name',
+                     'delivery_type__title_en', 'payment_method')
     list_filter = ('delivery_type', 'payment_method', 'created_at')
     inlines = [OrderItemInline]
 
@@ -50,3 +57,22 @@ class FavoriteProductAdmin(admin.ModelAdmin):
     list_filter = ('user',)
     ordering = ('user',)
 
+
+@admin.register(YandexTrip)
+class YandexTripAdmin(admin.ModelAdmin):
+    list_display = (
+        'order',
+        'claim_id',
+        'courier_name',
+        'car_model',
+        'car_number',
+        'status',
+    )
+    search_fields = (
+        'claim_id',
+        'courier_name',
+        'car_model',
+        'car_number',
+        'order__id',
+    )
+    list_filter = ('status',)
