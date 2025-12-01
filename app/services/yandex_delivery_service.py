@@ -36,7 +36,7 @@ def create_claim(order_id: int):
             {
                 "address": {
                     "fullname": "3-й проезд Эшона Бобохонова, 41, Ташкент",
-                    "coordinates": [69.191207, 41.342409]
+                    "coordinates": [69.203140, 41.213730]
                 },
                 "contact": {
                     "name": "Kunleek online store",
@@ -106,7 +106,7 @@ def check_price(latitude: float, longitude: float):
     data = {
         "route_points": [
             {
-                "coordinates": [69.191207, 41.342409],
+                "coordinates": [69.203140, 41.213730],
                 "type": "source",
                 "id": 1
             },
