@@ -27,8 +27,8 @@ def create_product_from_billz(product_data):
             if shop_price['shop_id'] == shop_id:
                 price = shop_price['retail_price']
                 break
-        if not price:
-            continue
+        # if not price:
+        #     continue
         
         photos = [
             photo['photo_url']
