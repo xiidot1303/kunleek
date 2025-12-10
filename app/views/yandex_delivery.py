@@ -63,6 +63,6 @@ class CheckPrice(APIView):
         lon = request.GET.get("lon")
         price = check_price(float(lat), float(lon))
         return Response(
-            {"price": price},
+            {"price": "19900"},
             status=200
         )
