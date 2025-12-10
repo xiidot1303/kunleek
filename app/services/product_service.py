@@ -19,8 +19,8 @@ def create_product_from_billz(product_data):
             if shop_measurement['shop_id'] == shop_id:
                 quantity = shop_measurement['active_measurement_value']
                 break
-        if not quantity:
-            continue
+        # if not quantity:
+        #     continue
         # get price
         price = None
         for shop_price in product.get("shop_prices", []):
