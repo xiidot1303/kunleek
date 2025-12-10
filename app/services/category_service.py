@@ -42,6 +42,6 @@ def list_categories_id_in_sell() -> list:
         has_products = Product.objects.filter(
             category_id__in=descendant_ids, quantity__gt=0).exists()
         if has_products:
-            main_categories.append(cat)
+            main_categories.append(cat.id)
 
     return main_categories
