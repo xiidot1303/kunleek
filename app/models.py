@@ -35,9 +35,9 @@ class Product(models.Model):
         verbose_name="Категория"
     )
     billz_id = models.CharField(max_length=128, unique=True, null=True, verbose_name="ID Billz")
-    name = models.CharField(max_length=100, verbose_name="Название")
-    name_uz = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на узбекском")
-    name_ru = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на русском")
+    name = models.CharField(max_length=1024, verbose_name="Название")
+    name_uz = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на узбекском")
+    name_ru = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на русском")
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
     photo = models.URLField(null=True, blank=True, verbose_name="URL фото")
