@@ -30,12 +30,18 @@ def create_product_from_billz(product_data):
         # if not price:
         #     continue
         
+        # get category name
+        category_name = None
+        for custom_field in product.get("custom_fields", []):
+            if custom_field["custom_field_id"] == "99440f1a-7030-4463-ad8e-71924388d4fe":
+                category_name = custom_field["custom_field_value"]
+
         photos = [
             photo['photo_url']
             for photo in product.get("photos", [])
         ]
         # create or update product
-        category: Category = Category.objects.filter(billz_id=category_id).first()
+        category: Category = Category.objects.filter(name=category_name).first() if category_name else None
         if billz_id in existing_products:
             product_obj = existing_products[billz_id]
             product_obj.name = name
