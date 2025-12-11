@@ -45,3 +45,16 @@ def list_categories_id_in_sell() -> list:
             main_categories.append(cat.id)
 
     return main_categories
+
+
+def create_category_by_data(category_data, parent: Category = None):
+    for category, subcategories in category_data.items():
+        category_obj, created = Category.objects.get_or_create(
+            name=category,
+            defaults={
+                'parent_category': parent,
+                'name_ru': category
+            }
+        )
+        if subcategories:
+            create_category_by_data(subcategories, parent=category_obj)
