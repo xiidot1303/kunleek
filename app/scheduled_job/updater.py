@@ -16,5 +16,5 @@ class jobs:
         'interval', minutes=5)
     scheduler.add_job(save_langs_to_redis, 'interval', minutes=20)
 
-    scheduler.add_job(billz_job.fetch_categories, 'interval', minutes=120)
-    scheduler.add_job(billz_job.fetch_products, 'interval', minutes=20)
+    # scheduler.add_job(billz_job.fetch_categories, 'interval', minutes=120)
+    scheduler.add_job(billz_job.fetch_products, 'interval', minutes=2)

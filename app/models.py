@@ -2,7 +2,7 @@ from django.db import models
     
 
 class Category(models.Model):
-    billz_id = models.CharField(max_length=128, null=True, verbose_name="ID Billz")
+    billz_id = models.CharField(max_length=128, null=True, blank=True, verbose_name="ID Billz")
     name = models.CharField(max_length=100, null=True, verbose_name="Название")
     name_uz = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на узбекском")
     name_ru = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на русском")
