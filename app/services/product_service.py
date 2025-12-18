@@ -10,7 +10,8 @@ def create_product_from_billz(product_data):
         billz_id = product.get("id")
         category_id = product['categories'][0]['id'] if product['categories'] else None
         name = product.get("name").split("/")[0].strip()
-        description = product.get("description", "")
+        # description = product.get("description", "")
+        description = ""
         sku = product.get("sku", "")
         main_photo = product.get("main_image_url_full")
         # get quantity
