@@ -63,7 +63,7 @@ def create_product_from_billz(product_data):
                 category=category,
                 description=description,
                 price=discount_price or price,
-                price_without_discount=discount_price,
+                price_without_discount=price,
                 photo=main_photo,
                 photos=photos,
                 sku=sku,
