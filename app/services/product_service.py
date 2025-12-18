@@ -23,9 +23,11 @@ def create_product_from_billz(product_data):
         #     continue
         # get price
         price = None
+        discount_price = 0
         for shop_price in product.get("shop_prices", []):
             if shop_price['shop_id'] == shop_id:
                 price = shop_price['retail_price']
+                discount_price = shop_price['promo_price']
                 break
         # if not price:
         #     continue
@@ -48,6 +50,7 @@ def create_product_from_billz(product_data):
             product_obj.category = category
             product_obj.description = description
             product_obj.price = price
+            product_obj.discount_price = discount_price
             product_obj.photo = main_photo
             product_obj.photos = photos
             product_obj.sku = sku,
@@ -60,6 +63,7 @@ def create_product_from_billz(product_data):
                 category=category,
                 description=description,
                 price=price,
+                discount_price=discount_price,
                 photo=main_photo,
                 photos=photos,
                 sku=sku,
@@ -73,6 +77,6 @@ def create_product_from_billz(product_data):
     if products_to_update:
         Product.objects.bulk_update(
             products_to_update,
-            ['name', 'category', 'description', 'price', 'photo', 'photos', 'sku', 'quantity'],
+            ['name', 'category', 'description', 'price', 'discount_price', 'photo', 'photos', 'sku', 'quantity'],
             batch_size=500
         )

@@ -40,6 +40,7 @@ class Product(models.Model):
     name_ru = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на русском")
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Цена")
     photo = models.URLField(null=True, blank=True, verbose_name="URL фото")
     photos = models.JSONField(
         default=list,
