@@ -15,7 +15,7 @@ def create_product_from_billz(product_data):
         sku = product.get("sku", "")
         main_photo = product.get("main_image_url_full")
         # get quantity
-        quantity = None
+        quantity = 0
         for shop_measurement in product.get("shop_measurement_values", []):
             if shop_measurement['shop_id'] == shop_id:
                 quantity = shop_measurement['active_measurement_value']
