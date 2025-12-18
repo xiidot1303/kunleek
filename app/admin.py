@@ -42,7 +42,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'name_uz',
+    list_display = ('name', 'category', 'price', 'price_without_discount', 'name_uz',
                     'name_ru', 'mxik', 'package_code')
     search_fields = ('name', 'sku')
     list_filter = ('category',)
