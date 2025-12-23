@@ -70,7 +70,8 @@ class ProductAdmin(admin.ModelAdmin):
             excel_file = request.FILES.get("file")
 
             if not excel_file:
-                self.message_user(request, "No file uploaded", level=messages.ERROR)
+                self.message_user(request, "No file uploaded",
+                                  level=messages.ERROR)
                 return redirect("..")
 
             try:
@@ -86,6 +87,7 @@ class ProductAdmin(admin.ModelAdmin):
                         .filter(sku__in=skus)
                         .update(active=True)
                     )
+                    Product.objects.exclude(sku__in=skus).update(active=False)
 
                 self.message_user(
                     request,
@@ -103,7 +105,6 @@ class ProductAdmin(admin.ModelAdmin):
             return redirect("..")
 
         return render(request, "admin/upload_sku_excel.html")
-
 
 
 @admin.register(DeliveryType)
