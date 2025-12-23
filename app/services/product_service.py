@@ -12,7 +12,7 @@ def create_product_from_billz(product_data):
         name = product.get("name").split("/")[0].strip()
         # description = product.get("description", "")
         description = ""
-        sku = product.get("sku")
+        sku = product.get("sku", "")
         main_photo = product.get("main_image_url_full")
         # get quantity
         quantity = 0
@@ -54,7 +54,7 @@ def create_product_from_billz(product_data):
             product_obj.price_without_discount = price
             product_obj.photo = main_photo
             product_obj.photos = photos
-            product_obj.sku = sku,
+            product_obj.sku = sku
             product_obj.quantity = quantity
             products_to_update.append(product_obj)
         else:
