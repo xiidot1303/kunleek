@@ -49,7 +49,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'sku')
     list_filter = ('category',)
     ordering = ('name',)
-    list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code')
+    list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code', 'active')
     change_list_template = "admin/app/product/change_list.html"
 
     def get_urls(self):
