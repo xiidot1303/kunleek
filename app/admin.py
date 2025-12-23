@@ -3,6 +3,11 @@ from app.models import *
 from django.urls import path
 from django.contrib import messages
 from django.shortcuts import redirect
+import pandas as pd
+from django.contrib import admin, messages
+from django.shortcuts import render, redirect
+from django.urls import path
+from django.db import transaction
 
 
 def fetch_categories_manually(request):
@@ -19,7 +24,6 @@ def fetch_products_manually(request):
     return redirect("../")
 
 
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'name_uz', 'name_ru',
@@ -28,7 +32,6 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('parent_category',)
     ordering = ('index',)
     list_editable = ('index', 'name_uz', 'name_ru',)
-
 
     def get_urls(self):
         urls = super().get_urls()
@@ -39,23 +42,68 @@ class CategoryAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
 
-
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'price_without_discount', 'name_uz',
-                    'name_ru', 'mxik', 'package_code')
+                    'name_ru', 'mxik', 'package_code', 'active')
     search_fields = ('name', 'sku')
     list_filter = ('category',)
     ordering = ('name',)
     list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code')
+    change_list_template = "admin/app/product/change_list.html"
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path("fetch-products-manually/", self.admin_site.admin_view(fetch_products_manually),
                  name="fetch_products_manually"),
+            path(
+                "upload-sku-excel/",
+                self.admin_site.admin_view(self.upload_sku_excel),
+                name="product-upload-sku-excel",
+            )
         ]
         return custom_urls + urls
+
+    def upload_sku_excel(self, request):
+        if request.method == "POST":
+            excel_file = request.FILES.get("file")
+
+            if not excel_file:
+                self.message_user(request, "No file uploaded", level=messages.ERROR)
+                return redirect("..")
+
+            try:
+                # Read Excel, no header assumption
+                df = pd.read_excel(excel_file, header=None)
+
+                # First column only
+                skus = df.iloc[:, 0].dropna().astype(str).tolist()
+
+                with transaction.atomic():
+                    updated_count = (
+                        Product.objects
+                        .filter(sku__in=skus)
+                        .update(active=True)
+                    )
+
+                self.message_user(
+                    request,
+                    f"{updated_count} products marked as active",
+                    level=messages.SUCCESS,
+                )
+
+            except Exception as e:
+                self.message_user(
+                    request,
+                    f"Error processing file: {e}",
+                    level=messages.ERROR,
+                )
+
+            return redirect("..")
+
+        return render(request, "admin/upload_sku_excel.html")
+
 
 
 @admin.register(DeliveryType)

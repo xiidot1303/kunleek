@@ -1,0 +1,47 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 700px; margin-top: 40px;">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Upload SKU Excel</h4>
+        </div>
+
+        <div class="card-body">
+            <p class="text-muted">
+                Upload an Excel file where the <strong>first column contains product SKUs</strong>.
+                Matching products will be marked as <strong>active</strong>.
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group mb-3">
+                    <label for="file" class="form-label">Excel file (.xls, .xlsx)</label>
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        class="form-control"
+                        accept=".xls,.xlsx"
+                        required
+                    >
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href=".." class="btn btn-outline-secondary">
+                        ← Back to products
+                    </a>
+
+                    <button type="submit" class="btn btn-success px-4">
+                        Upload & Activate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

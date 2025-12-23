@@ -51,6 +51,7 @@ class Product(models.Model):
     quantity = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=0, verbose_name="Количество")
     mxik = models.CharField(max_length=100, null=True, blank=True, verbose_name="МХИК")
     package_code = models.CharField(max_length=100, null=True, blank=True, verbose_name="Код упаковки")
+    active = models.BooleanField(null=True, default=False)
     
     
     def __str__(self):
