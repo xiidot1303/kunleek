@@ -10,7 +10,7 @@ from django.db.models import Min, Max
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.filter(active=True)
     serializer_class = ProductSerializer
 
 
