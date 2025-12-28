@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.db.models import Exists, OuterRef, BooleanField
 from app.swagger_schemas import *
 from bot.models import Bot_user
-from django.db.models import Min, Max
+from django.db.models import Min, Max, F
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -29,6 +29,16 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response({"error": "Name parameter is required"}, status=400)
         
         products = self.queryset.filter(name__icontains=name)
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='discounted')
+    def discounted(self, request):
+        """
+        Get discounted products
+        """
+        products = self.queryset.filter(price__lt=F('price_without_discount'))
+        print(products.count())
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
