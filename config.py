@@ -26,6 +26,7 @@ GROUP_ID = os.environ.get("GROUP_ID")
 # Billz API
 BILLZ_SECRET_TOKEN = os.environ.get("BILLZ_SECRET_TOKEN")
 BILLZ_SHOP_ID = os.environ.get("BILLZ_SHOP_ID")
+BILLZ_CASHBOX_ID = os.environ.get("BILLZ_CASHBOX_ID")
 
 # Payme
 PAYME_CASH_ID = os.environ.get("PAYME_CASH_ID")

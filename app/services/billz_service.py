@@ -1,4 +1,4 @@
-from config import BILLZ_SECRET_TOKEN, BILLZ_SHOP_ID
+from config import BILLZ_SECRET_TOKEN, BILLZ_SHOP_ID, BILLZ_CASHBOX_ID
 import requests
 from django.core.cache import cache
 from app.services import *
@@ -10,7 +10,7 @@ class APIMethods:
     clients = "v1/client"
     customer = "v1/customer"
     client_card = "v1/client-card"
-    create_order = "v1/orders"
+    create_order = "v2/order"
 
 
 class ClientDetails:
@@ -111,11 +111,13 @@ class BillzService:
         return response_data["card_code"]
 
     def create_order(self):
-        url = f"{self.url}{APIMethods.create_order}"
+        url = f"{self.url}{APIMethods.create_order}?Billz-Response-Channel=HTTP"
         data = {
             "method": "order.create",
             "params": {
-                "shop_id": BILLZ_SHOP_ID
+                "shop_id": BILLZ_SHOP_ID,
+                "cashbox_id": BILLZ_CASHBOX_ID
+
             }
         }
         response = requests.post(url, headers=self.headers, json=data)
