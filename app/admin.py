@@ -77,18 +77,43 @@ class ProductAdmin(admin.ModelAdmin):
             try:
                 # Read Excel, no header assumption
                 df = pd.read_excel(excel_file, header=None)
+                df.columns = df.columns.str.strip().str.lower()
 
-                # First column only
-                skus = df.iloc[:, 0].dropna().astype(str).tolist()
+                # 2. Build lookup dict: {sku: {mxik, package_code}}
+                excel_data = (
+                    df[['sku', 'mxik', 'package_code']]
+                    .dropna(subset=['sku'])
+                    .set_index('sku')
+                    .to_dict(orient='index')
+                )
 
-                with transaction.atomic():
-                    updated_count = (
-                        Product.objects
-                        .filter(sku__in=skus)
-                        .update(active=True)
-                    )
-                    Product.objects.exclude(sku__in=skus).update(active=False)
+                sku_list = list(excel_data.keys())
 
+                # 3. Fetch products in one query
+                products = Product.objects.filter(sku__in=sku_list)
+
+                products_to_update = []
+
+                for product in products:
+                    data = excel_data.get(product.sku)
+                    if not data:
+                        continue
+                    
+                    product.mxik = data.get('mxik')
+                    product.package_code = data.get('package_code')
+                    product.active = True
+                    products_to_update.append(product)
+
+                # 4. Bulk update
+                if products_to_update:
+                    with transaction.atomic():
+                        Product.objects.bulk_update(
+                            products_to_update,
+                            ['mxik', 'package_code', 'active'],
+                            batch_size=1000
+                        )
+                        Product.objects.exclude(sku__in=sku_list).update(active=False)
+                updated_count = len(products_to_update)
                 self.message_user(
                     request,
                     f"{updated_count} products marked as active",
