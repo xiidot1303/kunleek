@@ -45,7 +45,8 @@ def create_claim(order_id: int):
                 "point_id": 1,
                 "type": "source",
                 "visit_order": 1,
-                "external_order_id": f"{order.id}"
+                "external_order_id": f"{order.id}",
+                "skip_confirmation": True,
             },
             {
                 "address": {
@@ -59,7 +60,8 @@ def create_claim(order_id: int):
                 "point_id": 2,
                 "type": "destination",
                 "visit_order": 2,
-                "external_order_id": f"{order.id}"
+                "external_order_id": f"{order.id}",
+                "skip_confirmation": True,
             }
         ],
         "callback_properties": {
