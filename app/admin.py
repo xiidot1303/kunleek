@@ -76,7 +76,7 @@ class ProductAdmin(admin.ModelAdmin):
 
             try:
                 # Read Excel, no header assumption
-                df = pd.read_excel(excel_file, header=None)
+                df = pd.read_excel(excel_file, header=None, dtype=str)
                 df.columns = df.columns.str.strip().str.lower()
 
                 # 2. Build lookup dict: {sku: {mxik, package_code}}
