@@ -76,19 +76,24 @@ class ProductAdmin(admin.ModelAdmin):
 
             try:
                 # Read Excel, no header assumption
-                df = pd.read_excel(excel_file, header=None, dtype=str)
-                df.columns = [str(col).strip().lower() for col in df.columns]
-                df['sku'] = df['sku'].apply(lambda x: str(x).strip() if x else None)
-                df['mxik'] = df['mxik'].apply(lambda x: str(x).strip() if x else None)
-                df['package_code'] = df['package_code'].apply(lambda x: str(x).strip() if x else None)
-                # 2. Build lookup dict: {sku: {mxik, package_code}}
-                excel_data = (
-                    df[['sku', 'mxik', 'package_code']]
-                    .dropna(subset=['sku'])
-                    .set_index('sku')
-                    .to_dict(orient='index')
+                df = pd.read_excel(excel_file, dtype=str)
+                # Normalize headers
+                df.columns = [str(c).strip().lower() for c in df.columns]
+
+                # Normalize values
+                for col in ['sku', 'mxik', 'package_code']:
+                    df[col] = df[col].apply(lambda x: str(x).strip() if x not in [None, ''] else None)
+
+                # Remove empty SKUs
+                df = df[df['sku'].notna()]
+
+                # Resolve duplicates (keep last)
+                df = (
+                    df.groupby('sku', as_index=False)
+                      .last()
                 )
 
+                excel_data = df.set_index('sku').to_dict(orient='index')
                 sku_list = list(excel_data.keys())
 
                 # 3. Fetch products in one query
