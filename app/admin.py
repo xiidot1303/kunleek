@@ -77,8 +77,10 @@ class ProductAdmin(admin.ModelAdmin):
             try:
                 # Read Excel, no header assumption
                 df = pd.read_excel(excel_file, header=None, dtype=str)
-                df.columns = df.columns.str.strip().str.lower()
-
+                df.columns = [str(col).strip().lower() for col in df.columns]
+                df['sku'] = df['sku'].apply(lambda x: str(x).strip() if x else None)
+                df['mxik'] = df['mxik'].apply(lambda x: str(x).strip() if x else None)
+                df['package_code'] = df['package_code'].apply(lambda x: str(x).strip() if x else None)
                 # 2. Build lookup dict: {sku: {mxik, package_code}}
                 excel_data = (
                     df[['sku', 'mxik', 'package_code']]
