@@ -121,7 +121,7 @@ class BillzService:
         }
         response = requests.post(url, headers=self.headers, json=data)
         response_data = response.json()
-        order_id = response_data.get("result")
+        order_id = response_data.get("id")
         self.order_id = order_id
         return order_id
 
