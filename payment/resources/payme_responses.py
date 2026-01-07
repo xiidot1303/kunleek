@@ -101,6 +101,18 @@ class Results:
                 ]
             }
         }
+        # add delivery price as a product for fiscalization
+        if account.delivery_price:
+            r['detail']['items'].append(
+                {
+                    "title": "Delivery",
+                    "price": int(account.delivery_price)*100,
+                    "count": 1,
+                    "code": "10107002001000000",
+                    "vat_percent": 0,
+                    "package_code": "1209885",
+                }
+            )
         # if test:
         #     r.pop('detail')
         return r
