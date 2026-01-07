@@ -28,7 +28,10 @@ class BillzService:
         self.method = method
         self.access_token = cache.get(
             "billz_access_token") or self.fetch_and_cache_access_token()
-        self.headers = {"Authorization": f"Bearer {self.access_token}"}
+        self.headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "platform-id": "7d4a4c38-dd84-4902-b744-0488b80a4c01"
+            }
 
     @staticmethod
     def fetch_and_cache_access_token():
@@ -113,12 +116,8 @@ class BillzService:
     def create_order(self):
         url = f"{self.url}{APIMethods.create_order}?Billz-Response-Channel=HTTP"
         data = {
-            "method": "order.create",
-            "params": {
-                "shop_id": BILLZ_SHOP_ID,
-                "cashbox_id": BILLZ_CASHBOX_ID
-
-            }
+            "shop_id": BILLZ_SHOP_ID,
+            "cashbox_id": BILLZ_CASHBOX_ID
         }
         response = requests.post(url, headers=self.headers, json=data)
         response_data = response.json()
