@@ -35,7 +35,8 @@ def create_product_from_billz(product_data):
         
         # get category name
         category_name = None
-        for custom_field in product.get("custom_fields", []):
+        custom_fields = product.get("custom_fields", []) or []
+        for custom_field in custom_fields:
             if custom_field["custom_field_id"] == "99440f1a-7030-4463-ad8e-71924388d4fe":
                 category_name = str(custom_field["custom_field_value"]).strip()
 
