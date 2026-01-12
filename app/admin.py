@@ -58,7 +58,7 @@ class DiscountCategoryAdmin(admin.ModelAdmin):
 
 
 class DiscountedPriceFilter(admin.SimpleListFilter):
-    title = "Discount status"
+    title = "Статус скидки"
     parameter_name = "discounted"
 
     def lookups(self, request, model_admin):
