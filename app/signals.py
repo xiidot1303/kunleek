@@ -29,9 +29,9 @@ def handle_order_payment_status_change(sender, instance: Order, **kwargs):
         )
 
         # send order to billz
-        transaction.on_commit(
-            lambda: send_order_to_billz.delay(instance.id)
-        )
+        # transaction.on_commit(
+        #     lambda: send_order_to_billz.delay(instance.id)
+        # )
 
         # Delivery
         if instance.delivery_type.type == 'express_yandex':
