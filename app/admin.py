@@ -8,6 +8,7 @@ from django.contrib import admin, messages
 from django.shortcuts import render, redirect
 from django.urls import path
 from django.db import transaction
+from django.db.models import F
 
 
 def fetch_categories_manually(request):
@@ -42,12 +43,41 @@ class CategoryAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
 
+class DiscountCategoryProductInline(admin.TabularInline):
+    model = Product
+    extra = 1
+
+
+@admin.register(DiscountCategory)
+class DiscountCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'index')
+    search_fields = ('name',)
+    ordering = ('index',)
+    list_editable = ('index',)
+    inlines = [DiscountCategoryProductInline]
+
+
+class DiscountedPriceFilter(admin.SimpleListFilter):
+    title = "Discount status"
+    parameter_name = "discounted"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("discounted_products", "Товары со скидкой"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "discounted_products":
+            return queryset.filter(price__lt=F("price_without_discount"))
+        return queryset
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'price_without_discount', 'name_uz',
+    list_display = ('name', 'category', 'discount_category', 'price', 'price_without_discount', 'name_uz',
                     'name_ru', 'mxik', 'package_code', 'active')
     search_fields = ('name', 'sku')
-    list_filter = ('category',)
+    list_filter = ('category', 'active', DiscountedPriceFilter,)
     ordering = ('name',)
     list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code', 'active')
     change_list_template = "admin/app/product/change_list.html"

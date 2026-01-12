@@ -16,8 +16,16 @@ class CategorySerializer(serializers.ModelSerializer):
             return CategorySerializer(obj.subcategories.all(), many=True).data
         return []
 
+class DiscountCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscountCategory
+        fields = ['id', 'name', 'index']
+
+
 class ProductSerializer(serializers.ModelSerializer):
     is_favorite = serializers.BooleanField(read_only=True)
+    discount_category = DiscountCategorySerializer()
+
     class Meta:
         model = Product
         fields = '__all__'

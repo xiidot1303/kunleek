@@ -38,7 +38,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         Get discounted products
         """
         products = self.queryset.filter(price__lt=F('price_without_discount'))
-        print(products.count())
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 

@@ -26,6 +26,19 @@ class Category(models.Model):
         ordering = ['index']
 
 
+class DiscountCategory(models.Model):
+    name = models.CharField(max_length=100, null=True, verbose_name="Название")
+    index = models.IntegerField(default=0, help_text="Порядок категории в списке")
+
+    class Meta:
+        verbose_name = "Скидочная категория"
+        verbose_name_plural = "Скидочные категории"
+        ordering = ['index']
+
+    def __str__(self):
+        return self.name
+
+
 class Product(models.Model):
     category = models.ForeignKey(
         Category,
@@ -34,16 +47,25 @@ class Product(models.Model):
         related_name='products',
         verbose_name="Категория"
     )
+    discount_category = models.ForeignKey(
+        DiscountCategory,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='products',
+        verbose_name="Скидочная категория"
+    )
     billz_id = models.CharField(max_length=128, unique=True, null=True, verbose_name="ID Billz")
     name = models.CharField(max_length=1024, verbose_name="Название")
     name_uz = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на узбекском")
     name_ru = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на русском")
-    description = models.TextField(verbose_name="Описание")
+    description = models.TextField(blank=True, null=True, verbose_name="Описание")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
     price_without_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Цена без скидки")
     photo = models.URLField(null=True, blank=True, verbose_name="URL фото")
     photos = models.JSONField(
         default=list,
+        blank=True,
         help_text="Список URL фото для продукта",
         verbose_name="Фото (список URL)"
     )
