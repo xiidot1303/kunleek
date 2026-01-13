@@ -171,10 +171,10 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(DeliveryType)
 class DeliveryTypeAdmin(admin.ModelAdmin):
-    list_display = ('title_uz', 'title_ru', 'price')
+    list_display = ('title_uz', 'title_ru', 'price', 'min_order_price', 'free_delivery_order_price')
     search_fields = ('title_uz', 'title_ru')
     ordering = ('title_uz',)
-    list_editable = ('price',)
+    list_editable = ('price', 'min_order_price', 'free_delivery_order_price')
 
 
 @admin.register(Banner)
