@@ -84,7 +84,7 @@ class BillzService:
         payload = {
             "first_name": first_name,
             "phone_number": phone_number,
-            "chat_id": chat_id
+            "chat_id": str(chat_id)
         }
         response = requests.post(url, headers=self.headers, json=payload)
         response_data = response.json()
