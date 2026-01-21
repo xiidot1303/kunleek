@@ -6,6 +6,7 @@ def create_product_from_billz(product_data):
     existing_products = Product.objects.in_bulk(field_name='billz_id')
     new_products = []
     products_to_update = []
+    billz_ids = []
     for product in product_data:
         billz_id = product.get("id")
         category_id = product['categories'][0]['id'] if product['categories'] else None
@@ -72,7 +73,11 @@ def create_product_from_billz(product_data):
                 quantity=quantity
             )
             new_products.append(product_obj)
-    
+        billz_ids.append(billz_id)
+
+    # delete products which is not in Billz
+    Product.objects.exclude(billz_id__in=billz_ids).delete()
+
     # bulk create or update products
     if new_products:
         Product.objects.bulk_create(new_products, batch_size=500)
