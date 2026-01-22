@@ -75,9 +75,6 @@ def create_product_from_billz(product_data):
             new_products.append(product_obj)
         billz_ids.append(billz_id)
 
-    # delete products which is not in Billz
-    Product.objects.exclude(billz_id__in=billz_ids).delete()
-
     # bulk create or update products
     if new_products:
         Product.objects.bulk_create(new_products, batch_size=500)
@@ -87,3 +84,9 @@ def create_product_from_billz(product_data):
             ['name', 'category', 'description', 'price', 'price_without_discount', 'photo', 'photos', 'sku', 'quantity'],
             batch_size=500
         )
+
+    return billz_ids
+
+
+def delete_products_not_in_billz(billz_ids):
+    Product.objects.exclude(billz_id__in=billz_ids).delete()

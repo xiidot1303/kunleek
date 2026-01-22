@@ -27,14 +27,18 @@ def fetch_categories():
 def fetch_products():
     billz_service = BillzService(method=APIMethods.products)
     page = 1
+    all_billz_ids = []
     while True:
         products = billz_service.fetch_products(page=page)
         if products:=products:
-            create_product_from_billz(products)
+            billz_ids = create_product_from_billz(products)
+            all_billz_ids.extend(billz_ids)
         else:
             break
         
         page += 1
+    # Deactivate products not in Billz
+    delete_products_not_in_billz(all_billz_ids)
 
 
 # def fetch_clients():
