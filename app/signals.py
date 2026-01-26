@@ -38,3 +38,10 @@ def handle_order_payment_status_change(sender, instance: Order, **kwargs):
             transaction.on_commit(
                 lambda: create_claim.delay(instance.id)
             )
+
+@receiver(post_save, sender=OrderItem)
+def handle_order_item_creation(sender, instance: OrderItem, created, **kwargs):
+    if created:
+        # Perform actions when a new order item is created
+        instance.product_name = instance.product.name if instance.product else ""
+        instance.save(update_fields=["product_name"])
