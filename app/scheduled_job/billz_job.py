@@ -38,7 +38,7 @@ def fetch_products():
         
         page += 1
     # Deactivate products not in Billz
-    delete_products_not_in_billz(all_billz_ids)
+    # delete_products_not_in_billz(all_billz_ids)
 
 
 # def fetch_clients():
