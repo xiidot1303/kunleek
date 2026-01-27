@@ -1,9 +1,26 @@
 from django.db import models
     
 
+class Shop(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Название")
+    shop_id = models.CharField(max_length=128, unique=True, verbose_name="ID Магазина Billz")
+    cashbox_id = models.CharField(max_length=128, unique=True, verbose_name="ID Кассы Billz")
+    # location coordinates
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Широта")
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Долгота")
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Магазин"
+        verbose_name_plural = "Магазины"
+
+
 class Category(models.Model):
     billz_id = models.CharField(max_length=128, null=True, blank=True, verbose_name="ID Billz")
-    name = models.CharField(max_length=100, null=True, verbose_name="Название")
+    name = models.CharField(max_length=100, null=True, unique=True, verbose_name="Название")
     name_uz = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на узбекском")
     name_ru = models.CharField(max_length=100, blank=True, null=True, verbose_name="Название на русском")
     parent_category = models.ForeignKey(
@@ -60,8 +77,6 @@ class Product(models.Model):
     name_uz = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на узбекском")
     name_ru = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на русском")
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
-    price_without_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Цена без скидки")
     photo = models.URLField(null=True, blank=True, verbose_name="URL фото")
     photos = models.JSONField(
         default=list,
@@ -70,7 +85,6 @@ class Product(models.Model):
         verbose_name="Фото (список URL)"
     )
     sku = models.CharField(null=True, blank=True, max_length=100, verbose_name="Артикул (SKU)")
-    quantity = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=0, verbose_name="Количество")
     mxik = models.CharField(max_length=100, null=True, blank=True, verbose_name="МХИК")
     package_code = models.CharField(max_length=100, null=True, blank=True, verbose_name="Код упаковки")
     active = models.BooleanField(null=True, default=False)
@@ -83,7 +97,22 @@ class Product(models.Model):
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
         ordering = ['name']
-    
+
+
+class ProductByShop(models.Model):
+    shop = models.ForeignKey('Shop', on_delete=models.CASCADE, related_name='products', verbose_name="Магазин")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='shops', verbose_name="Продукт")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
+    price_without_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Цена без скидки")
+    quantity = models.PositiveIntegerField(default=0, verbose_name="Количество")
+
+    class Meta:
+        verbose_name = "Продукт в магазине"
+        verbose_name_plural = "Продукты в магазинах"
+
+    def __str__(self):
+        return f"{self.product.name} в {self.shop.name}"
+
 
 class FavoriteProduct(models.Model):
     user = models.ForeignKey('bot.Bot_user', on_delete=models.CASCADE, related_name='favorite_products', verbose_name="User")

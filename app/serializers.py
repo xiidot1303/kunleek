@@ -25,6 +25,9 @@ class DiscountCategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     is_favorite = serializers.BooleanField(read_only=True)
     discount_category = DiscountCategorySerializer()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    price_without_discount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    quantity = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Product

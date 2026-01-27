@@ -11,6 +11,13 @@ from django.db import transaction
 from django.db.models import F
 
 
+def fetch_shops_manually(request):
+    from app.scheduled_job.billz_job import fetch_shops
+    fetch_shops()
+    messages.success(request, "Магазины успешно обновлены!")
+    return redirect("../")
+
+
 def fetch_categories_manually(request):
     from app.scheduled_job.billz_job import fetch_categories
     fetch_categories()
@@ -24,6 +31,23 @@ def fetch_products_manually(request):
     messages.success(request, "Продукты успешно обновлены!")
     return redirect("../")
 
+
+@admin.register(Shop)
+class ShopAdmin(admin.ModelAdmin):
+    list_display = ('name', 'latitude', 'longitude', 'is_active')
+    search_fields = ('name', 'shop_id', 'cashbox_id')
+    list_filter = ('is_active',)
+    ordering = ('name',)
+    list_editable = ('is_active', 'latitude', 'longitude')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path("fetch-shop-manually/", self.admin_site.admin_view(fetch_shops_manually),
+                 name="fetch_shops_manually"),
+        ]
+        return custom_urls + urls
+        
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -72,15 +96,21 @@ class DiscountedPriceFilter(admin.SimpleListFilter):
         return queryset
 
 
+class ProductByShopInline(admin.TabularInline):
+    model = ProductByShop
+    extra = 1
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'discount_category', 'price', 'price_without_discount', 'name_uz',
+    list_display = ('name', 'category', 'discount_category', 'name_uz',
                     'name_ru', 'mxik', 'package_code', 'active')
     search_fields = ('name', 'sku')
     list_filter = ('category', 'active', DiscountedPriceFilter,)
     ordering = ('name',)
     list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code', 'active')
     change_list_template = "admin/app/product/change_list.html"
+    inlines = [ProductByShopInline]
 
     def get_urls(self):
         urls = super().get_urls()

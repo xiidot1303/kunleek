@@ -1,0 +1,8 @@
+{% extends "admin/change_list.html" %} {% block object-tools %}
+<ul class="object-tools">
+  {{ block.super }}
+    <a href="{% url 'admin:fetch_shops_manually' %}" class="btn btn-primary mr-2">
+      Синхронизировать магазины
+    </a>
+</ul>
+{% endblock %}

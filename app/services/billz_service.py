@@ -11,6 +11,7 @@ class APIMethods:
     customer = "v1/customer"
     client_card = "v1/client-card"
     create_order = "v2/order"
+    shops = "v1/shop"
 
 
 class ClientDetails:
@@ -45,6 +46,12 @@ class BillzService:
             cache.set("billz_access_token", access_token, timeout=86400)
         return access_token
 
+    def fetch_shops(self):
+        url = f"{self.url}{APIMethods.shops}"
+        response = requests.get(url, headers=self.headers)
+        response_data = response.json()
+        return response_data.get("shops", [])
+
     def fetch_categories(self):
         url = f"{self.url}{APIMethods.category}"
         response = requests.get(url, headers=self.headers)
@@ -53,7 +60,7 @@ class BillzService:
 
     def fetch_products(self, page=1):
         url = f"{self.url}{APIMethods.products}"
-        params = {"page": page}
+        params = {"page": page, "limit": 500}
         response = requests.get(url, headers=self.headers, params=params)
         response_data = response.json()
         return response_data.get("products", [])

@@ -4,6 +4,7 @@ from django.core.cache import cache
 from app.services.category_service import *
 from app.services.product_service import *
 from app.services.client_service import *
+from app.services.shop_service import *
 from app.services.billz_service import BillzService, APIMethods
 
 def fetch_and_cache_access_token():
@@ -40,6 +41,11 @@ def fetch_products():
     # Deactivate products not in Billz
     # delete_products_not_in_billz(all_billz_ids)
 
+
+def fetch_shops():
+    billz_service = BillzService(method=APIMethods.shops)
+    shops = billz_service.fetch_shops()
+    create_shop_from_billz(shops)
 
 # def fetch_clients():
 #     billz_service = BillzService(method=APIMethods.clients)
