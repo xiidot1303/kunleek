@@ -29,7 +29,7 @@ async def main_menu(update: Update, context: CustomContext):
         ],
     ]
 
-    webapp = WebAppInfo(url=f"{WEBAPP_URL}")
+    webapp = WebAppInfo(url=f"{WEBAPP_URL}?selectlocation=yes")
 
     markup = ReplyKeyboardMarkup(
         keyboard=buttons,

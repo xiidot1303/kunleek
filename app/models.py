@@ -68,7 +68,7 @@ class Product(models.Model):
         DiscountCategory,
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='products',
         verbose_name="Скидочная категория"
     )
@@ -109,6 +109,7 @@ class ProductByShop(models.Model):
     class Meta:
         verbose_name = "Продукт в магазине"
         verbose_name_plural = "Продукты в магазинах"
+        unique_together = ('shop', 'product')
 
     def __str__(self):
         return f"{self.product.name} в {self.shop.name}"

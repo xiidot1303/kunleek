@@ -92,16 +92,31 @@ class OrderSerializer(serializers.ModelSerializer):
         return instance
 
 class FavoriteProductSerializer(serializers.ModelSerializer):
-    class ProductSerializer(serializers.ModelSerializer):
+    class ProductSerializer2(serializers.ModelSerializer):
+        price = serializers.DecimalField(source='product_price', max_digits=10, decimal_places=2, read_only=True)
+        price_without_discount = serializers.DecimalField(
+            source='product_price_without_discount', max_digits=10, decimal_places=2, read_only=True)
+        quantity = serializers.IntegerField(source='product_quantity', read_only=True)
+
         class Meta:
             model = Product
             fields = '__all__'
-            ref_name = 'FavoriteProduct_ProductSerializer'
+            ref_name = 'FavoriteProduct_ProductSerializer2'
 
-    product = ProductSerializer(read_only=True)
+    product = serializers.SerializerMethodField()
     class Meta:
         model = FavoriteProduct
         fields = ['id', 'user', 'product']
+        
+    def get_product(self, obj):
+        data = ProductSerializer(obj.product).data
+
+        # inject annotated fields
+        data['price'] = obj.product_price
+        data['price_without_discount'] = obj.product_price_without_discount
+        data['quantity'] = obj.product_quantity
+
+        return data
 
 
 class BotUserSerializer(serializers.ModelSerializer):
@@ -109,3 +124,10 @@ class BotUserSerializer(serializers.ModelSerializer):
         model = Bot_user
         fields = '__all__'
         read_only_fields = ['date', 'user_id']
+
+
+class ShopSerializer(serializers.ModelSerializer):
+    """Serializer for the Shop model."""
+    class Meta:
+        model = Shop
+        fields = ['id', 'name', 'latitude', 'longitude']

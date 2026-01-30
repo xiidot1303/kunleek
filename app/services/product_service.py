@@ -1,6 +1,7 @@
-from app.models import Product, Category, Shop, ProductByShop
+from app.models import Product, Category, Shop, ProductByShop, FavoriteProduct
 from config import BILLZ_SHOP_ID as shop_id, BILLZ_CATEGORY4_ID as category_custom_field_id
 from decimal import Decimal
+from django.db.models import OuterRef, Subquery, Exists, QuerySet
 
 
 def create_product_from_billz(product_data):
@@ -135,3 +136,18 @@ def create_product_from_billz(product_data):
 
 def delete_products_not_in_billz(billz_ids):
     Product.objects.exclude(billz_id__in=billz_ids).delete()
+
+
+def filter_products_for_serializer(
+        queryset: QuerySet[Product], 
+        user_id: int, 
+        shop_id: int
+        ) -> QuerySet[Product]:
+    favorites = FavoriteProduct.objects.filter(user__user_id=user_id, product=OuterRef('pk'))
+    products_by_shop = ProductByShop.objects.filter(shop_id=shop_id, product=OuterRef('pk'))
+    products = queryset.filter(shops__shop_id=shop_id).annotate(
+        is_favorite=Exists(favorites)).annotate(price=Subquery(products_by_shop.values('price')[:1]),
+        price_without_discount=Subquery(products_by_shop.values('price_without_discount')[:1]),
+        quantity=Subquery(products_by_shop.values('quantity')[:1]),
+    ).order_by('price')
+    return products

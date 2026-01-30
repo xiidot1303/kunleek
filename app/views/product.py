@@ -1,12 +1,12 @@
 from rest_framework import viewsets
-from app.models import Product, Category, FavoriteProduct
+from app.models import Product, Category, FavoriteProduct, ProductByShop
 from app.serializers import ProductSerializer, CategorySerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Exists, OuterRef, BooleanField
 from app.swagger_schemas import *
 from bot.models import Bot_user
 from django.db.models import Min, Max, F
+from app.services.product_service import filter_products_for_serializer
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -14,9 +14,16 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
 
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user_id = self.request.query_params.get('user_id')
+        shop_id = self.request.query_params.get('shop_id')
+
+        return filter_products_for_serializer(queryset, user_id, shop_id)
+
     @swagger_auto_schema(
         method='get',
-        manual_parameters=product_by_name,
+        manual_parameters=[product_by_name_param, shop_id_param],
         responses={200: openapi.Response('Products found by name', ProductSerializer(many=True))}
     )
     @action(detail=False, methods=['get'], url_path='by-name')
@@ -27,30 +34,28 @@ class ProductViewSet(viewsets.ModelViewSet):
         name = request.query_params.get('name')
         if not name:
             return Response({"error": "Name parameter is required"}, status=400)
-        
-        products = self.queryset.filter(name__icontains=name)
+
+        products = self.get_queryset().filter(name__icontains=name)
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(manual_parameters=[shop_id_param])
     @action(detail=False, methods=['get'], url_path='discounted')
     def discounted(self, request):
         """
         Get discounted products
         """
-        products = self.queryset.filter(price__lt=F('price_without_discount'))
+        products = self.get_queryset().filter(price__lt=F('price_without_discount'))
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(manual_parameters=[shop_id_param])
     @action(detail=False, methods=['get'], url_path='by-category/(?P<category_id>[^/.]+)')
     def by_category(self, request, category_id=None):
         """
         Get products by category ID.
         """
-        user_id = request.query_params.get('user_id')
-        favorites = FavoriteProduct.objects.filter(user__user_id=user_id, product=OuterRef('pk'))
-        products = self.queryset.filter(category_id=category_id).annotate(
-            is_favorite=Exists(favorites)
-        ).order_by('price')
+        products = self.get_queryset().filter(category_id=category_id)
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
@@ -85,6 +90,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method='get',
+        manual_parameters=[shop_id_param],
         responses={200: openapi.Response('Minimum and maximum prices of products', 
             openapi.Schema(
                 type=openapi.TYPE_OBJECT,
@@ -100,9 +106,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         """
         Get minimum and maximum prices of products.
         """
-        min_price = self.queryset.aggregate(min_price=Min('price'))['min_price']
-        max_price = self.queryset.aggregate(max_price=Max('price'))['max_price']
-        
+        min_price = self.get_queryset().aggregate(min_price=Min('price'))['min_price']
+        max_price = self.get_queryset().aggregate(max_price=Max('price'))['max_price']
+
         return Response({
             "min_price": min_price,
             "max_price": max_price

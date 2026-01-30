@@ -11,6 +11,7 @@ from app.views.product import ProductViewSet
 from app.views.category import CategoryViewSet
 from app.views.delivery import DeliveryTypeViewSet
 from app.views.banner import BannerViewSet
+from app.views.shop import ShopViewSet
 from app.views.order import OrderViewSet, OrderItemViewSet
 from app.views.favorite_product import FavoriteProductViewSet
 from app.views.client import BotUserViewSet
@@ -20,6 +21,7 @@ from app.views.yandex_delivery import YandexDeliveryView, CheckPrice
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'shops', ShopViewSet, basename='shop')
 router.register(r'delivery-types', DeliveryTypeViewSet, basename='delivery-type')
 router.register(r'banners', BannerViewSet, basename='banner')
 router.register(r'orders', OrderViewSet, basename='order')
