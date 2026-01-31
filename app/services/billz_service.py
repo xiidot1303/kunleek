@@ -120,11 +120,11 @@ class BillzService:
         response_data = response.json()
         return response_data["card_code"]
 
-    def create_order(self):
+    def create_order(self, shop_id, cashbox_id):
         url = f"{self.url}{APIMethods.create_order}?Billz-Response-Channel=HTTP"
         data = {
-            "shop_id": BILLZ_SHOP_ID,
-            "cashbox_id": BILLZ_CASHBOX_ID
+            "shop_id": shop_id,
+            "cashbox_id": cashbox_id
         }
         response = requests.post(url, headers=self.headers, json=data)
         response_data = response.json()

@@ -10,7 +10,10 @@ def send_order_to_billz(order_id):
     items = order.items.all()
 
     billz_service = BillzService(method=APIMethods.create_order)
-    billz_service.create_order()
+    billz_service.create_order(
+        shop_id=order.shop.shop_id,
+        cashbox_id=order.shop.cashbox_id
+    )
     # add products to the order
     for item in items:
         item: OrderItem

@@ -6,6 +6,7 @@ from app.services.newsletter_service import send_order_info_to_group, send_invoi
 from app.services.order_service import send_order_to_billz
 from django.db import transaction
 from app.services.yandex_delivery_service import create_claim
+from config import DEBUG
 
 @receiver(post_save, sender=Order)
 def handle_cash_payment_order(sender, instance: Order, created, **kwargs):
@@ -29,15 +30,17 @@ def handle_order_payment_status_change(sender, instance: Order, **kwargs):
         )
 
         # send order to billz
-        # transaction.on_commit(
-        #     lambda: send_order_to_billz.delay(instance.id)
-        # )
+        if not DEBUG:
+            transaction.on_commit(
+                lambda: send_order_to_billz.delay(instance.id)
+            )
 
         # Delivery
-        if instance.delivery_type.type == 'express_yandex':
-            transaction.on_commit(
-                lambda: create_claim.delay(instance.id)
-            )
+        if not DEBUG:
+            if instance.delivery_type.type == 'express_yandex':
+                transaction.on_commit(
+                    lambda: create_claim.delay(instance.id)
+                )
 
 @receiver(post_save, sender=OrderItem)
 def handle_order_item_creation(sender, instance: OrderItem, created, **kwargs):

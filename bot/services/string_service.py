@@ -30,3 +30,10 @@ def perfomer_arrived_pickup_string(yandex_trip: YandexTrip):
         order_id=yandex_trip.order.id
     )
     return text
+
+
+payment_methods = {
+    "cash": "Наличные",
+    "click": "Click",
+    "payme": "Payme",
+}
