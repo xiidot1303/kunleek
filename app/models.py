@@ -167,6 +167,7 @@ class Customer(models.Model):
 class Order(models.Model):
     bot_user = models.ForeignKey('bot.Bot_user', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Пользователь бота")
     customer = models.ForeignKey(Customer, related_name='orders', on_delete=models.CASCADE, verbose_name="Клиент")
+    shop = models.ForeignKey(Shop, null=True, related_name='orders', on_delete=models.SET_NULL, verbose_name="Магазин")
     delivery_type = models.ForeignKey(DeliveryType, on_delete=models.CASCADE, verbose_name="Тип доставки")
     payment_method = models.CharField(max_length=50, verbose_name="Метод оплаты")
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма")

@@ -106,7 +106,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'discount_category', 'name_uz',
                     'name_ru', 'mxik', 'package_code', 'active')
     search_fields = ('name', 'sku')
-    list_filter = ('category', 'active', DiscountedPriceFilter,)
+    list_filter = ('category', 'active')
     ordering = ('name',)
     list_editable = ('name_uz', 'name_ru', 'mxik', 'package_code', 'active')
     change_list_template = "admin/app/product/change_list.html"
@@ -199,6 +199,39 @@ class ProductAdmin(admin.ModelAdmin):
         return render(request, "admin/upload_sku_excel.html")
 
 
+@admin.register(ProductByShop)
+class ProductByShopAdmin(admin.ModelAdmin):
+    list_display = ('shop', 'product', 'product_category',
+                    'product_discount_category', 'price', 'price_without_discount', 'quantity')
+    search_fields = ('shop__name', 'product__name')
+    list_filter = ('shop', 'product', DiscountedPriceFilter)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return (
+            qs
+            .select_related('shop', 'product')
+            .annotate(
+                product_category=F('product__category__name'),
+                product_discount_category=F('product__discount_category__name'),
+            )
+        )
+
+    @admin.display(
+        description='Category',
+        ordering='product_category',
+    )
+    def product_category(self, obj):
+        return obj.product_category
+
+    @admin.display(
+        description='Discount Category',
+        ordering='product_discount_category',
+    )
+    def product_discount_category(self, obj):
+        return obj.product_discount_category
+
+
 @admin.register(DeliveryType)
 class DeliveryTypeAdmin(admin.ModelAdmin):
     list_display = ('title_uz', 'title_ru', 'price', 'min_order_price', 'free_delivery_order_price')
@@ -219,11 +252,11 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bot_user', 'customer', 'delivery_type',
+    list_display = ('id', 'shop', 'bot_user', 'customer', 'delivery_type',
                     'payment_method', 'subtotal', 'delivery_price', 'total', 'created_at')
     search_fields = ('customer__first_name',
                      'delivery_type__title_en', 'payment_method')
-    list_filter = ('delivery_type', 'payment_method', 'created_at')
+    list_filter = ('delivery_type', 'payment_method', 'created_at', 'shop')
     inlines = [OrderItemInline]
 
 
