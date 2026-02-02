@@ -30,6 +30,7 @@ Django==4.2.23
 django-apscheduler==0.6.2
 django-cors-headers==4.3.1
 django-extensions==4.1
+django-import-export==4.4.0
 django-jazzmin==3.0.0
 django-payments==3.1.0
 django-phonenumber-field==8.1.0

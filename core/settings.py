@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'adrf',
     'payments',
+    'import_export',
 ]
 
 MIDDLEWARE = [

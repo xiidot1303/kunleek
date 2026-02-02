@@ -10,6 +10,8 @@ from django.shortcuts import render, redirect
 from django.urls import path
 from django.db import transaction
 from django.db.models import F
+from import_export import resources
+from import_export.admin import ExportMixin
 
 
 def fetch_shops_manually(request):
@@ -313,9 +315,15 @@ class OrderItemInline(admin.TabularInline):
     extra = 1
 
 
+class OrderResource(resources.ModelResource):
+    class Meta:
+        model = Order
+
+
 @admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'shop', 'bot_user', 'customer', 'delivery_type',
+class OrderAdmin(ExportMixin, admin.ModelAdmin):
+    resource_class = OrderResource
+    list_display = ('billz_id', 'shop', 'bot_user', 'customer', 'delivery_type',
                     'payment_method', 'delivery_price', 'total', 'status', 'created_at')
     search_fields = ('customer__first_name',
                      'delivery_type__title_en', 'payment_method')
