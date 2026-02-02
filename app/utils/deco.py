@@ -1,18 +1,20 @@
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.views import redirect_to_login
-from django.shortcuts import resolve_url
-from django.conf import settings
-from app.services.user_service import *
+from functools import wraps
+import traceback
+from core.exceptions import *
+from app.services.error_handler import run_on_error
 
-async def go_to_login(request):
-    path = await request.get_full_path()
-    return redirect_to_login(path)
 
-async def group_required(*groups):
-    async def decorator(function):
-        async def wrapper(request, *args, **kwargs):
-            if is_user_in_group(request, *groups):
-                return function(request, *args, **kwargs)
-            raise PermissionDenied
-        return wrapper
-    return decorator
+def handle_exceptions(func):
+    """
+    Universal decorator to catch any exception in the wrapped function
+    and call run_on_error.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            run_on_error(e)
+            raise
+    return wrapper
+

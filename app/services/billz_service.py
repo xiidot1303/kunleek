@@ -2,6 +2,7 @@ from config import BILLZ_SECRET_TOKEN, BILLZ_SHOP_ID, BILLZ_CASHBOX_ID
 import requests
 from django.core.cache import cache
 from app.services import *
+from core.exceptions import BillzAPIError
 
 
 class APIMethods:
@@ -33,6 +34,24 @@ class BillzService:
             "Authorization": f"Bearer {self.access_token}",
             "platform-id": "7d4a4c38-dd84-4902-b744-0488b80a4c01"
             }
+
+    def send_request(self, url, data=None, params=None, http_method="GET"):
+        if http_method == "GET":
+            response = requests.get(
+                url, headers=self.headers, params=params)
+        elif http_method == "POST":
+            response = requests.post(
+                url, headers=self.headers, json=data)
+        elif http_method == "PUT":
+            response = requests.put(
+                url, headers=self.headers, json=data)
+        else:
+            raise ValueError("Unsupported HTTP method")
+        response_data = response.json()
+        if not response.ok:
+            self.error = response_data
+            raise BillzAPIError("", url=url, response_data=response_data)
+        return response_data
 
     @staticmethod
     def fetch_and_cache_access_token():
@@ -126,8 +145,10 @@ class BillzService:
             "shop_id": shop_id,
             "cashbox_id": cashbox_id
         }
-        response = requests.post(url, headers=self.headers, json=data)
-        response_data = response.json()
+        try:
+            response_data = self.send_request(url, data=data, http_method="POST")
+        except BillzAPIError as e:
+            raise BillzAPIError(f"Failed to create order in Billz", url=e.url, response_data=e.response_data)
         order_id = response_data.get("id")
         order_number = response_data.get("data", {}).get("order_number")
         self.order_id = order_id
@@ -143,9 +164,10 @@ class BillzService:
             "is_manual": False,
             "response_type": "HTTP"
         }
-
-        response = requests.post(url, headers=self.headers, json=data)
-        response_data = response.json()
+        try:
+            response_data = self.send_request(url, data=data, http_method="POST")
+        except BillzAPIError as e:
+            raise BillzAPIError(f"Failed to add product to order in Billz", url=e.url, response_data=e.response_data)
         return response_data
 
     def make_discount(self, amount):
@@ -155,8 +177,7 @@ class BillzService:
             "discount_value": int(amount),
         }
 
-        response = requests.post(url, headers=self.headers, json=data)
-        response_data = response.json()
+        response_data = self.send_request(url, data=data, http_method="POST")
         return response_data
 
     def bind_client_to_order(self, client_id):
@@ -166,8 +187,7 @@ class BillzService:
             "check_auth_code": False
         }
 
-        response = requests.put(url, headers=self.headers, json=data)
-        response_data = response.json()
+        response_data = self.send_request(url, data=data, http_method="PUT")
         return response_data
 
     def complete_order(self, paid_amount, payment_method, with_cashback=0):
@@ -204,6 +224,5 @@ class BillzService:
             "skip_ofd": False
         }
 
-        response = requests.post(url, headers=self.headers, json=data)
-        response_data = response.json()
+        response_data = self.send_request(url, data=data, http_method="POST")
         return response_data

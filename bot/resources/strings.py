@@ -151,9 +151,10 @@ class Strings:
         "Спасибо за ваш заказ 😊"
     ]
 
-    _ = [
-        "",
-        ""
+    order_error = [
+        "❌ Buyurtma #{order_id} jarayonida xatolik yuz berganligi uchun sizning buyurtmangiz bekor qilindi." \
+        "Iltimos qaytatdan urininb ko'ring",
+        "❌ Произошла ошибка при обработке заказа #{order_id}. Пожалуйста, попробуйте еще раз."
     ]
 
     _ = [

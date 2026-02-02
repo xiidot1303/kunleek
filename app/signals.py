@@ -2,34 +2,46 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from app.models import *
-from app.services.newsletter_service import send_order_info_to_group, send_invoice_to_user
+from app.services.newsletter_service import send_order_info_to_group, send_invoice_to_user, notify_client_order_error
 from app.services.order_service import send_order_to_billz
 from django.db import transaction
 from app.services.yandex_delivery_service import create_claim
 from config import DEBUG
 from app.utils.data_classes import OrderStatus, YandexTripStatus
+from celery.signals import task_failure
+from app.services.error_handler import run_on_error
+
 
 @receiver(post_save, sender=Order)
 def handle_cash_payment_order(sender, instance: Order, created, **kwargs):
     if created and (instance.payment_method == "cash" or instance.total == 0):
-        instance.payed = True
-        instance.save(update_fields=["payed"])
+        instance.status = OrderStatus.READY_TO_APPROVAL
+        instance.save(update_fields=["status"])
     elif created:
         # send invoice to user with order information
         transaction.on_commit(
             lambda: send_invoice_to_user.delay(instance.id)
         )
 
+
 @receiver(post_save, sender=Order)
 def handle_order_payment_status_change(sender, instance: Order, **kwargs):
-    if instance.payed and not instance.billz_id:
+    if instance.payed and instance.status == OrderStatus.CREATED:
+        # change order status
+        instance.status = OrderStatus.READY_TO_APPROVAL
+        instance.save(update_fields=["status"])
+
+
+@receiver(post_save, sender=Order)
+def handle_order_status_change(sender, instance: Order, **kwargs):
+    if instance.status == OrderStatus.READY_TO_APPROVAL and not instance.billz_id:
         # send order to billz
         if not DEBUG:
             transaction.on_commit(
                 lambda: send_order_to_billz.delay(instance.id)
             )
 
-    elif instance.payed and not instance.sent_to_group:
+    elif instance.status == OrderStatus.READY_TO_APPROVAL and not instance.sent_to_group:
         # Perform actions when payed changes to True
         instance.sent_to_group = True
         instance.save(update_fields=["sent_to_group"])
@@ -38,9 +50,8 @@ def handle_order_payment_status_change(sender, instance: Order, **kwargs):
         )
     
     elif (
-            instance.payed and 
-            instance.delivery_type.type == 'express_yandex' and 
-            instance.status == OrderStatus.CREATED
+            instance.status == OrderStatus.READY_TO_APPROVAL and
+            instance.delivery_type.type == 'express_yandex'
         ):
         # Delivery
         if not DEBUG:
@@ -52,6 +63,9 @@ def handle_order_payment_status_change(sender, instance: Order, **kwargs):
                 instance.status = OrderStatus.WAITING_DELIVERY_WORKING_HOURS
                 instance.save(update_fields=["status"])
 
+    elif OrderStatus.is_error(instance.status):
+        # send error notification to client
+        notify_client_order_error(instance.id)
 
 @receiver(post_save, sender=OrderItem)
 def handle_order_item_creation(sender, instance: OrderItem, created, **kwargs):
@@ -68,3 +82,9 @@ def handle_yandex_trip_status_change(sender, instance: YandexTrip, **kwargs):
         order: Order = instance.order
         order.status = OrderStatus.DELIVERED
         order.save(update_fields=["status"])
+
+
+@task_failure.connect
+def celery_task_failure_handler(sender=None, task_id=None, exception=None,
+                               args=None, kwargs=None, traceback=None, einfo=None, **kw):
+    run_on_error(exception)

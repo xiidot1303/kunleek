@@ -231,6 +231,7 @@ class Order(models.Model):
     payment_system = models.CharField(max_length=50, blank=True, null=True, verbose_name="Платежная система")
     STATUS_CHOICES = [
         (OrderStatus.CREATED, 'Создан'),
+        (OrderStatus.READY_TO_APPROVAL, 'Готов к утверждению'),
         (OrderStatus.WAITING_DELIVERY_WORKING_HOURS, 'Ожидание рабочего времени доставки'),
         (OrderStatus.YANDEX_DELIVERING, 'Yandex Доставляется'),
         (OrderStatus.DELIVERING, 'Доставляется'),

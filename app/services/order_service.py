@@ -2,37 +2,49 @@ from app.models import Order, Product, OrderItem
 from celery import shared_task
 from app.services.billz_service import BillzService, APIMethods
 from asgiref.sync import sync_to_async
+from core.exceptions import OrderError, BillzAPIError
+import html
+from app.utils.data_classes import OrderStatus
 
 
 @shared_task
 def send_order_to_billz(order_id):
-    order = Order.objects.get(id=order_id)
-    items = order.items.all()
+    try:
+        order = Order.objects.get(id=order_id)
+        items = order.items.all()
 
-    billz_service = BillzService(method=APIMethods.create_order)
-    billz_service.create_order(
-        shop_id=order.shop.shop_id,
-        cashbox_id=order.shop.cashbox_id
-    )
-    # add products to the order
-    for item in items:
-        item: OrderItem
-        billz_service.add_product_to_order(
-            product_id=item.product.billz_id,
-            quantity=item.quantity
+        billz_service = BillzService(method=APIMethods.create_order)
+        billz_service.create_order(
+            shop_id=order.shop.shop_id,
+            cashbox_id=order.shop.cashbox_id
         )
+        # add products to the order
+        for item in items:
+            item: OrderItem
+            billz_service.add_product_to_order(
+                product_id=item.product.billz_id,
+                quantity=item.quantity
+            )
 
-    billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
-    billz_service.complete_order(
-        paid_amount=order.subtotal - order.bonus_used, 
-        payment_method=order.payment_method,
-        with_cashback=order.bonus_used
-        )
-    status_code = billz_service.get("status_code")
-    if status_code == 200:
+        billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
+        billz_service.complete_order(
+            paid_amount=order.subtotal - order.bonus_used, 
+            payment_method=order.payment_method,
+            with_cashback=order.bonus_used
+            )
+        
         order.billz_id = billz_service.order_number
         order.save(update_fields=["billz_id"])
-
+    except BillzAPIError as e:
+        order.status = OrderStatus.ERROR_IN_BILLZ_API
+        order.save(update_fields=["status"])
+        error = (
+            f"<b>Error occurred while sending order to Billz:</b> {e}\n"
+            f"ID: {order.id}\n"
+            f"URL: <code>{e.url}</code>\n"
+            f"Response Data: <pre>{(html.escape(str(e.response_data)))}</pre>"
+        )
+        raise OrderError(error, order_id=order.id)
 
 async def get_order_by_id(id: int | str) -> Order | None:
     obj = await Order.objects.filter(id=id).afirst()
