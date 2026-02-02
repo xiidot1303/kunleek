@@ -196,7 +196,7 @@ def ask_review_from_user(order_id):
         [{
             "text": Strings.leave_feedback[bot_user.lang],
             "web_app": {
-                "url": f"{WEBHOOK_URL}/feedback/{order.id}/{lang}"
+                "url": f"{WEBAPP_URL}/feedback/{order.id}/{lang}"
             }
         }]
     ]
