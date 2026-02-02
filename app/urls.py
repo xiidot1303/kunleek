@@ -16,6 +16,7 @@ from app.views.order import OrderViewSet, OrderItemViewSet
 from app.views.favorite_product import FavoriteProductViewSet
 from app.views.client import BotUserViewSet
 from app.views.yandex_delivery import YandexDeliveryView, CheckPrice
+from app.views.order_review import OrderReviewViewSet
 
 
 router = DefaultRouter()
@@ -28,6 +29,8 @@ router.register(r'orders', OrderViewSet, basename='order')
 router.register(r'order-items', OrderItemViewSet, basename='orderitem')
 router.register(r'favorite-products', FavoriteProductViewSet, basename='favoriteproduct')
 router.register(r'bot-users', BotUserViewSet, basename='botuser')
+router.register(r'order-reviews', OrderReviewViewSet, basename='orderreview')
+
 
 # Swagger imports
 from drf_yasg.views import get_schema_view

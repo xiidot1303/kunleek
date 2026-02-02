@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect
 from django.urls import path
 from django.db import transaction
 from django.db.models import F
-from import_export import resources
+from import_export import resources, fields
 from import_export.admin import ExportMixin
 
 
@@ -315,7 +315,26 @@ class OrderItemInline(admin.TabularInline):
     extra = 1
 
 
+class OrderReviewInline(admin.TabularInline):
+    model = OrderReview
+    extra = 1
+
+
 class OrderResource(resources.ModelResource):
+    items = fields.Field()
+    reviews = fields.Field()
+
+    def dehydrate_items(self, order):
+        return "\n".join(
+            f"{i.product_name} x{i.quantity} | {i.price}"
+            for i in order.items.all()
+        )
+
+    def dehydrate_reviews(self, order):
+        return "\n".join(
+            f"{r.rating} | {r.comment}"
+            for r in order.reviews.all()
+        )
     class Meta:
         model = Order
 
@@ -328,7 +347,7 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
     search_fields = ('customer__first_name',
                      'delivery_type__title_en', 'payment_method')
     list_filter = ('delivery_type', 'payment_method', 'created_at', 'shop')
-    inlines = [OrderItemInline]
+    inlines = [OrderItemInline, OrderReviewInline]
 
 
 @admin.register(FavoriteProduct)
@@ -357,3 +376,10 @@ class YandexTripAdmin(admin.ModelAdmin):
         'order__id',
     )
     list_filter = ('status',)
+
+
+@admin.register(OrderReview)
+class OrderReviewAdmin(admin.ModelAdmin):
+    list_display = ('order', 'rating', 'comment')
+    search_fields = ('order__id', 'comment')
+    list_filter = ('rating',)

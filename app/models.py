@@ -241,7 +241,8 @@ class Order(models.Model):
         (OrderStatus.WAITING_DELIVERY_WORKING_HOURS, 'Ожидание рабочего времени доставки'),
         (OrderStatus.YANDEX_DELIVERING, 'Yandex Доставляется'),
         (OrderStatus.DELIVERING, 'Доставляется'),
-        (OrderStatus.DELIVERED, 'Доставлен')
+        (OrderStatus.DELIVERED, 'Доставлен'),
+        (OrderStatus.RATED, 'Оценен')
     ]
     status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус", default=OrderStatus.CREATED, choices=STATUS_CHOICES)
     payment_status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус платежа")
@@ -269,6 +270,19 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.product.name}"
     
+
+class OrderReview(models.Model):
+    order = models.ForeignKey(Order, related_name='reviews', on_delete=models.CASCADE, verbose_name="Заказ")
+    rating = models.PositiveIntegerField(verbose_name="Рейтинг", choices=[(i, str(i)) for i in range(1, 6)])
+    comment = models.TextField(verbose_name="Комментарий", blank=True)
+
+    class Meta:
+        verbose_name = "Отзыв о заказе"
+        verbose_name_plural = "Отзывы о заказах"
+
+    def __str__(self):
+        return f"Review for Order {self.order.id}"
+
 
 class YandexTrip(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='yandex_trip', verbose_name="Заказ")

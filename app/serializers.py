@@ -132,3 +132,10 @@ class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
         fields = ['id', 'name', 'latitude', 'longitude']
+
+
+class OrderReviewSerializer(serializers.ModelSerializer):
+    """Serializer for the OrderReview model."""
+    class Meta:
+        model = OrderReview
+        fields = '__all__'

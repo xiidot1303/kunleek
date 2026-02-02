@@ -151,10 +151,65 @@ class Strings:
         "Спасибо за ваш заказ 😊"
     ]
 
+    gratitude_for_review = [
+        "Xizmatimizni baholaganingizdan minnatdormiz! 😊",
+        "Благодарим вас за отзыв! 😊"
+    ]
+
     order_error = [
         "❌ Buyurtma #{order_id} jarayonida xatolik yuz berganligi uchun sizning buyurtmangiz bekor qilindi." \
         "Iltimos qaytatdan urininb ko'ring",
         "❌ Произошла ошибка при обработке заказа #{order_id}. Пожалуйста, попробуйте еще раз."
+    ]
+
+    ask_review = [
+        "🎉 Buyurtmangiz yetkazildi!\nIltimos, xizmatimizni baholang — bu bizga yanada yaxshiroq bo‘lishga yordam beradi.\nRahmat!",
+        "🎉 Заказ доставлен!\nОцените, пожалуйста, наш сервис — ваш отзыв помогает нам становиться лучше.\nСпасибо!"
+    ]
+
+    leave_feedback = [
+        "📝 Xizmatni baholash",
+        "📝 Оставить отзыв"
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
     ]
 
     _ = [

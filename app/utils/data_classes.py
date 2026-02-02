@@ -7,6 +7,7 @@ class OrderStatus:
     WAITING_DELIVERY_WORKING_HOURS = 'waiting_delivery_working_hours'
     DELIVERED = 'delivered'
     ERROR_IN_BILLZ_API = 'error_in_billz_api'
+    RATED = 'rated'
 
     @staticmethod
     def is_error(status):

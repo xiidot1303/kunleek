@@ -1,8 +1,9 @@
 from celery import shared_task
 from config import WEBHOOK_URL, GROUP_ID
-from app.models import Order
+from app.models import Order, OrderReview
 from bot.models import Bot_user
 from bot import Strings
+from bot.bot import WebAppInfo
 from asgiref.sync import async_to_sync
 from payment.services import get_invoice_url
 from bot.services.string_service import *
@@ -153,13 +154,22 @@ def notify_admin_order_delivered(yandex_trip_id):
     )
 
 
-
-
 @shared_task
 def send_gratitude_to_client(yandex_trip_id):
     yandex_trip: YandexTrip = YandexTrip.objects.get(pk=yandex_trip_id)
     bot_user: Bot_user = yandex_trip.order.bot_user
     text = Strings.gratitude_to_client[bot_user.lang]
+    send_newsletter_api(
+        bot_user_id=bot_user.user_id,
+        text=text
+    )
+
+
+@shared_task
+def send_gratitude_for_review_to_client(review_id):
+    order_review: OrderReview = OrderReview.objects.get(pk=review_id)
+    bot_user: Bot_user = order_review.order.bot_user
+    text = Strings.gratitude_for_review[bot_user.lang]
     send_newsletter_api(
         bot_user_id=bot_user.user_id,
         text=text
@@ -174,4 +184,24 @@ def notify_client_order_error(order_id):
     send_newsletter_api(
         bot_user_id=bot_user.user_id,
         text=text
+    )
+
+@shared_task
+def ask_review_from_user(order_id):
+    order: Order = Order.objects.get(pk=order_id)
+    bot_user: Bot_user = order.bot_user
+    lang = bot_user.get_lang_display()
+    text = Strings.ask_review[bot_user.lang]
+    inline_buttons = [
+        [{
+            "text": Strings.leave_feedback[bot_user.lang],
+            "web_app": {
+                "url": f"{WEBHOOK_URL}/feedback/{order.id}/{lang}"
+            }
+        }]
+    ]
+    send_newsletter_api(
+        bot_user_id=bot_user.user_id,
+        text=text,
+        inline_buttons=inline_buttons
     )

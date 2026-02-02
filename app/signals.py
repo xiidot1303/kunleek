@@ -2,7 +2,14 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from app.models import *
-from app.services.newsletter_service import send_order_info_to_group, send_invoice_to_user, notify_client_order_error
+from app.services.newsletter_service import (
+    send_order_info_to_group, 
+    send_invoice_to_user, 
+    notify_client_order_error,
+    ask_review_from_user,
+    send_gratitude_to_client,
+    send_gratitude_for_review_to_client
+    )
 from app.services.order_service import send_order_to_billz
 from django.db import transaction
 from app.services.yandex_delivery_service import create_claim
@@ -65,6 +72,12 @@ def handle_order_status_change(sender, instance: Order, **kwargs):
                 instance.status = OrderStatus.WAITING_DELIVERY_WORKING_HOURS
                 instance.save(update_fields=["status"])
 
+    elif instance.status == OrderStatus.DELIVERED:
+        # ask review from bot user
+        transaction.on_commit(
+            lambda: ask_review_from_user.delay(instance.id)
+        )
+
     elif OrderStatus.is_error(instance.status):
         # send error notification to client
         notify_client_order_error(instance.id)
@@ -90,3 +103,13 @@ def handle_yandex_trip_status_change(sender, instance: YandexTrip, **kwargs):
 def celery_task_failure_handler(sender=None, task_id=None, exception=None,
                                args=None, kwargs=None, traceback=None, einfo=None, **kw):
     run_on_error(exception)
+
+
+@receiver(post_save, sender=OrderReview)
+def handle_order_review_creation(sender, instance: OrderReview, created, **kwargs):
+    if created:
+        # send gratitude message to user
+        send_gratitude_for_review_to_client.delay(instance.id)
+        order: Order = instance.order
+        order.status = OrderStatus.RATED
+        order.save(update_fields=["status"])
