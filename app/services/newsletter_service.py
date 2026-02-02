@@ -53,7 +53,7 @@ def send_order_info_to_group(order_id: int):
 
     text = (
         f"🆕 Новый заказ!\n\n"
-        f"🆔 ID заказа: #{order.id}\n"
+        f"🆔 ID заказа: #{order.billz_id}\n"
         f"🏬 Магазин: {order.shop.name}\n"
         f"👤 Клиент: {order.customer.first_name}\n"
         f"📞 Телефон клиента: {order.customer.phone}\n"

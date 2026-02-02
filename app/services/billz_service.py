@@ -129,8 +129,10 @@ class BillzService:
         response = requests.post(url, headers=self.headers, json=data)
         response_data = response.json()
         order_id = response_data.get("id")
+        order_number = response_data.get("data", {}).get("order_number")
         self.order_id = order_id
-        return order_id
+        self.order_number = order_number
+        return response_data
 
     def add_product_to_order(self, product_id, quantity):
         url = f"{self.url}v2/order-product/{self.order_id}"

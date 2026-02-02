@@ -28,7 +28,11 @@ def send_order_to_billz(order_id):
         payment_method=order.payment_method,
         with_cashback=order.bonus_used
         )
-    
+    status_code = billz_service.get("status_code")
+    if status_code == 200:
+        order.billz_id = billz_service.order_number
+        order.save(update_fields=["billz_id"])
+
 
 async def get_order_by_id(id: int | str) -> Order | None:
     obj = await Order.objects.filter(id=id).afirst()

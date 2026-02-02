@@ -22,30 +22,35 @@ def handle_cash_payment_order(sender, instance: Order, created, **kwargs):
 
 @receiver(post_save, sender=Order)
 def handle_order_payment_status_change(sender, instance: Order, **kwargs):
-    if instance.payed and not instance.sent_to_group:
-        # Perform actions when payed changes to True
-        instance.sent_to_group = True
-        instance.save(update_fields=["sent_to_group"])
-        transaction.on_commit(
-            lambda: send_order_info_to_group.delay(instance.id)
-        )
-
+    if instance.payed and not instance.billz_id:
         # send order to billz
         if not DEBUG:
             transaction.on_commit(
                 lambda: send_order_to_billz.delay(instance.id)
             )
 
+    elif instance.payed and not instance.sent_to_group:
+        # Perform actions when payed changes to True
+        instance.sent_to_group = True
+        instance.save(update_fields=["sent_to_group"])
+        transaction.on_commit(
+            lambda: send_order_info_to_group.delay(instance.id)
+        )
+    
+    elif (
+            instance.payed and 
+            instance.delivery_type.type == 'express_yandex' and 
+            instance.status == OrderStatus.CREATED
+        ):
         # Delivery
         if not DEBUG:
-            if instance.delivery_type.type == 'express_yandex':
-                if instance.delivery_type.is_open():
-                    transaction.on_commit(
-                        lambda: create_claim.delay(instance.id)
-                    )
-                else:
-                    instance.status = OrderStatus.WAITING_DELIVERY_WORKING_HOURS
-                    instance.save(update_fields=["status"])
+            if instance.delivery_type.is_open():
+                transaction.on_commit(
+                    lambda: create_claim.delay(instance.id)
+                )
+            else:
+                instance.status = OrderStatus.WAITING_DELIVERY_WORKING_HOURS
+                instance.save(update_fields=["status"])
 
 
 @receiver(post_save, sender=OrderItem)

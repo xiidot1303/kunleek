@@ -212,6 +212,7 @@ class Customer(models.Model):
 
 
 class Order(models.Model):
+    billz_id = models.CharField(max_length=255, null=True, blank=True, verbose_name="ID")
     bot_user = models.ForeignKey('bot.Bot_user', null=True, blank=True, on_delete=models.CASCADE, verbose_name="Пользователь бота")
     customer = models.ForeignKey(Customer, related_name='orders', on_delete=models.CASCADE, verbose_name="Клиент")
     shop = models.ForeignKey(Shop, null=True, related_name='orders', on_delete=models.SET_NULL, verbose_name="Магазин")
