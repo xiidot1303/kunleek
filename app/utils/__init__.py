@@ -110,3 +110,10 @@ class DictToClass:
     def __repr__(self):
         # This will allow a readable representation of the object when printed
         return f"{self.__class__.__name__}({self.__dict__})"
+
+
+weekdays_by_lang = {
+    'ru': ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"],
+    'uz': ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"],
+    'en': ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+}

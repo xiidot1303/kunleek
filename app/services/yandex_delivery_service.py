@@ -2,6 +2,7 @@ from celery import shared_task
 from app.models import Order, YandexTrip
 from app.services import *
 from config import YANDEX_DELIVERY_API_KEY, YANDEX_DELIVERY_URL, YANDEX_DELIVERY_CALLBACK_URL
+from app.utils.data_classes import OrderStatus
 
 class PerformerInfo(DictToClass):
     courier_name: str
@@ -90,7 +91,7 @@ def create_claim(order_id: int):
         json=data
     )
     if claim_id := response.json().get("id"):
-        order.status = "yandex_claim_created"
+        order.status = OrderStatus.YANDEX_DELIVERING
         order.save(update_fields=["status"])
         # create YandexTrip
         YandexTrip.objects.create(

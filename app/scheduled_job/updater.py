@@ -5,6 +5,7 @@ from bot.scheduled_job import mailing
 from bot.services.redis_service import save_langs_to_redis
 from asgiref.sync import async_to_sync
 from app.scheduled_job import billz_job
+from app.scheduled_job import order_job
 
 class jobs:
     scheduler = BackgroundScheduler(timezone='Asia/Tashkent')
@@ -19,3 +20,4 @@ class jobs:
     # scheduler.add_job(billz_job.fetch_categories, 'interval', minutes=120)
     scheduler.add_job(billz_job.fetch_products, 'interval', minutes=2)
     scheduler.add_job(billz_job.fetch_shops, 'interval', minutes=20)
+    scheduler.add_job(order_job.create_claims_if_delivery_open, 'interval', minutes=10)

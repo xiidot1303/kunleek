@@ -35,9 +35,10 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class DeliveryTypeSerializer(serializers.ModelSerializer):
+    description = serializers.CharField(read_only=True)
     class Meta:
         model = DeliveryType
-        fields = '__all__'
+        fields = ['id', 'title_uz', 'title_ru', 'price', 'description', 'type', 'min_order_price', 'free_delivery_order_price']
 
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:

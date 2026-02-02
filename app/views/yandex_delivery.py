@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from app.services.yandex_delivery_service import *
 from app.services.newsletter_service import *
 from app.models import *
+from app.utils.data_classes import YandexTripStatus
 
 
 class CallbackData(DictToClass):
@@ -20,11 +21,11 @@ class YandexDeliveryView(APIView):
         yandex_trip: YandexTrip = YandexTrip.objects.filter(
                     claim_id=callback.claim_id).first()
         match callback.status:
-            case "ready_for_approval":
+            case YandexTripStatus.READY_FOR_APPROVAL:
                 # accept order
                 accept_order.delay(callback.claim_id)
 
-            case "performer_found":
+            case YandexTripStatus.PERFORMER_FOUND:
                 # get info
                 info = order_info(callback.claim_id)
                 performer_info = PerformerInfo(info["performer_info"])
@@ -36,16 +37,16 @@ class YandexDeliveryView(APIView):
                 # send notification to client about performer
                 send_performer_info_to_client(yandex_trip)
 
-            case "pickup_arrived":
+            case YandexTripStatus.PICKUP_ARRIVED:
                 # courier arrived to point
                 # send notification to admin group
                 notify_admin_about_performer_arrived.delay(yandex_trip.id)
 
-            case "delivery_arrived":
+            case YandexTripStatus.DELIVERY_ARRIVED:
                 # notify client about driver arrived
                 notify_client_delivery_arrived.delay(yandex_trip.id)
-            
-            case "delivered":
+
+            case YandexTripStatus.DELIVERED:
                 # notify admin about order delivered
                 notify_admin_order_delivered.delay(yandex_trip.id)
                 send_gratitude_to_client.delay(yandex_trip.id)

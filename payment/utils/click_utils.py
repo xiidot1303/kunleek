@@ -81,7 +81,7 @@ def click_webhook_errors(request: AsyncRequest):
             'error_note' : _('Incorrect parameter amount')
         }
 
-    if order.status == PaymentStatus.CONFIRMED or order.payed:
+    if order.payment_status == PaymentStatus.CONFIRMED or order.payed:
         return {
             'error' : '-4',
             'error_note' : _('Already paid')
@@ -96,7 +96,7 @@ def click_webhook_errors(request: AsyncRequest):
                 'error_note' : _('Transaction not found')
             }
 
-    if order.status == PaymentStatus.REJECTED or int(error) < 0:
+    if order.payment_status == PaymentStatus.REJECTED or int(error) < 0:
         return {
             'error' : '-9',
             'error_note' : _('Transaction cancelled')
@@ -112,7 +112,7 @@ def prepare(request: AsyncRequest):
     result = click_webhook_errors(request)
     order = order_load(order_id)
     if result['error'] == '0':
-        order.status = PaymentStatus.WAITING
+        order.payment_status = PaymentStatus.WAITING
         order.save()
     result['click_trans_id'] = request.data.get('click_trans_id', None)
     result['merchant_trans_id'] = request.data.get('merchant_trans_id', None)
@@ -125,10 +125,10 @@ def complete(request: AsyncRequest):
     order = order_load(order_id)
     result = click_webhook_errors(request)
     if request.data.get('error', None) != None and int(request.data.get('error', None)) < 0:
-        order.status = PaymentStatus.REJECTED
+        order.payment_status = PaymentStatus.REJECTED
         order.save()
     if result['error'] == '0':
-        order.status = PaymentStatus.CONFIRMED
+        order.payment_status = PaymentStatus.CONFIRMED
         order.save()
         async_to_sync(account_pay)(order, 'click')
 

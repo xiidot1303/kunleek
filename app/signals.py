@@ -7,12 +7,13 @@ from app.services.order_service import send_order_to_billz
 from django.db import transaction
 from app.services.yandex_delivery_service import create_claim
 from config import DEBUG
+from app.utils.data_classes import OrderStatus, YandexTripStatus
 
 @receiver(post_save, sender=Order)
 def handle_cash_payment_order(sender, instance: Order, created, **kwargs):
     if created and (instance.payment_method == "cash" or instance.total == 0):
         instance.payed = True
-        handle_order_payment_status_change(sender, instance)
+        instance.save(update_fields=["payed"])
     elif created:
         # send invoice to user with order information
         transaction.on_commit(
@@ -38,9 +39,14 @@ def handle_order_payment_status_change(sender, instance: Order, **kwargs):
         # Delivery
         if not DEBUG:
             if instance.delivery_type.type == 'express_yandex':
-                transaction.on_commit(
-                    lambda: create_claim.delay(instance.id)
-                )
+                if instance.delivery_type.is_open():
+                    transaction.on_commit(
+                        lambda: create_claim.delay(instance.id)
+                    )
+                else:
+                    instance.status = OrderStatus.WAITING_DELIVERY_WORKING_HOURS
+                    instance.save(update_fields=["status"])
+
 
 @receiver(post_save, sender=OrderItem)
 def handle_order_item_creation(sender, instance: OrderItem, created, **kwargs):
@@ -48,3 +54,12 @@ def handle_order_item_creation(sender, instance: OrderItem, created, **kwargs):
         # Perform actions when a new order item is created
         instance.product_name = instance.product.name if instance.product else ""
         instance.save(update_fields=["product_name"])
+
+
+@receiver(post_save, sender=YandexTrip)
+def handle_yandex_trip_status_change(sender, instance: YandexTrip, **kwargs):
+    if instance.status == YandexTripStatus.DELIVERED:
+        # Perform actions when the Yandex trip is delivered
+        order: Order = instance.order
+        order.status = OrderStatus.DELIVERED
+        order.save(update_fields=["status"])

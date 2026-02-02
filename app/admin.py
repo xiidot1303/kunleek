@@ -1,5 +1,6 @@
 from django.contrib import admin
 from app.models import *
+from django import forms
 from django.urls import path
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -240,6 +241,68 @@ class DeliveryTypeAdmin(admin.ModelAdmin):
     list_editable = ('price', 'min_order_price', 'free_delivery_order_price')
 
 
+WEEKDAY_CHOICES = [
+    ('0', 'Понедельник'),
+    ('1', 'Вторник'),
+    ('2', 'Среда'),
+    ('3', 'Четверг'),
+    ('4', 'Пятница'),
+    ('5', 'Суббота'),
+    ('6', 'Воскресенье'),
+]
+
+
+class DeliveryTypeForm(forms.ModelForm):
+    working_days = forms.MultipleChoiceField(
+        choices=WEEKDAY_CHOICES,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Рабочие дни",
+        help_text="Выберите рабочие дни 0=Понедельник..6=Воскресенье",
+    )
+
+    class Meta:
+        model = DeliveryType
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # populate initial values from instance (convert ints to strings)
+        if self.instance and getattr(self.instance, 'working_days', None):
+            self.initial['working_days'] = [str(d) for d in self.instance.working_days]
+
+        # Explain available placeholders for out-of-work messages
+        placeholder_help = (
+            "Допустимы плейсхолдеры: {next_work_date}, {next_work_time}, {next_work_weekday}. "
+            "Они будут заменены на ближайшую дату/время/день недели, когда доставка снова будет доступна. "
+            "Пример: 'Открываем {next_work_time} {next_work_date} ({next_work_weekday})'."
+        )
+
+        for fld in ('out_of_work_message_uz', 'out_of_work_message_ru'):
+            if fld in self.fields:
+                # append to existing help_text if present
+                existing = self.fields[fld].help_text or ''
+                if existing:
+                    self.fields[fld].help_text = f"{existing} {placeholder_help}"
+                else:
+                    self.fields[fld].help_text = placeholder_help
+                # also set a small placeholder in the textarea widget if possible
+                widget = self.fields[fld].widget
+                try:
+                    widget.attrs.setdefault('placeholder', 'Используйте плейсхолдеры, например: {next_work_time} {next_work_date}')
+                except Exception:
+                    pass
+
+    def clean_working_days(self):
+        val = self.cleaned_data.get('working_days') or []
+        # convert to ints before saving to JSONField
+        return [int(x) for x in val]
+
+
+# attach the custom form to the admin
+DeliveryTypeAdmin.form = DeliveryTypeForm
+
+
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
     list_display = ('photo',)
@@ -253,7 +316,7 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'shop', 'bot_user', 'customer', 'delivery_type',
-                    'payment_method', 'subtotal', 'delivery_price', 'total', 'created_at')
+                    'payment_method', 'delivery_price', 'total', 'status', 'created_at')
     search_fields = ('customer__first_name',
                      'delivery_type__title_en', 'payment_method')
     list_filter = ('delivery_type', 'payment_method', 'created_at', 'shop')

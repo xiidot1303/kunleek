@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from app.utils.data_classes import OrderStatus
     
 
 class Shop(models.Model):
@@ -124,7 +126,8 @@ class DeliveryType(models.Model):
     title_uz = models.CharField(max_length=255, null=True, verbose_name="Название (узбекский)")
     title_ru = models.CharField(max_length=255, null=True, verbose_name="Название (русский)")
     price = models.DecimalField(max_digits=10, decimal_places=0, verbose_name="Цена")
-    description = models.TextField(null=True, blank=True, verbose_name="Описание")
+    description_uz = models.TextField(null=True, blank=True, verbose_name="Описание (узбекский)")
+    description_ru = models.TextField(null=True, blank=True, verbose_name="Описание (русский)")
     TYPE_CHOICES = [
         ('express_yandex', 'Yandex'),
         ('during_day', 'В течение дня'),
@@ -132,6 +135,11 @@ class DeliveryType(models.Model):
     type = models.CharField(max_length=100, null=True, choices=TYPE_CHOICES, verbose_name="Тип")
     min_order_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Минимальная цена заказа")
     free_delivery_order_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Цена бесплатной доставки")
+    work_start_time = models.TimeField(null=True, blank=True, verbose_name="Начало рабочего времени")
+    work_end_time = models.TimeField(null=True, blank=True, verbose_name="Конец рабочего времени")
+    working_days = models.JSONField(default=list, blank=True, verbose_name="Рабочие дни", help_text="Список номеров дней недели 0=Monday..6=Sunday")
+    out_of_work_message_uz = models.TextField(null=True, blank=True, verbose_name="Сообщение вне рабочего времени (узбекский)")
+    out_of_work_message_ru = models.TextField(null=True, blank=True, verbose_name="Сообщение вне рабочего времени (русский)")
 
     class Meta:
         verbose_name = "Тип доставки"
@@ -139,6 +147,45 @@ class DeliveryType(models.Model):
 
     def __str__(self):
         return self.title_uz
+
+    def is_open(self, dt=None):
+        """Return True if the delivery type is available at given datetime (or now).
+
+        - If `working_days` is set (non-empty) it must contain the weekday number (0=Mon..6=Sun).
+        - If both `work_start_time` and `work_end_time` are set, the current time must be within the interval.
+        If no constraints are set the method returns True.
+        """
+        if dt is None:
+            dt = timezone.datetime.now()
+
+        # check working days
+        if self.working_days:
+            try:
+                day = dt.weekday()
+            except Exception:
+                return False
+            if day not in self.working_days:
+                return False
+
+        # check working hours
+        if self.work_start_time and self.work_end_time:
+            t = dt.time()
+            # simple interval check (does not handle overnight ranges)
+            return self.work_start_time <= t <= self.work_end_time
+
+        return True
+
+    def next_work_day(self, dt=None) -> timezone.datetime:
+        """Return the next working day for this delivery type."""
+        if dt is None:
+            dt = timezone.datetime.now()
+
+        # Find the next working day
+        next_day = dt + timezone.timedelta(days=1)
+        while next_day.weekday() not in self.working_days:
+            next_day += timezone.timedelta(days=1)
+
+        return next_day
 
 
 class Banner(models.Model):
@@ -181,7 +228,15 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     payed = models.BooleanField(default=False, verbose_name="Оплачено")
     payment_system = models.CharField(max_length=50, blank=True, null=True, verbose_name="Платежная система")
-    status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус")
+    STATUS_CHOICES = [
+        (OrderStatus.CREATED, 'Создан'),
+        (OrderStatus.WAITING_DELIVERY_WORKING_HOURS, 'Ожидание рабочего времени доставки'),
+        (OrderStatus.YANDEX_DELIVERING, 'Yandex Доставляется'),
+        (OrderStatus.DELIVERING, 'Доставляется'),
+        (OrderStatus.DELIVERED, 'Доставлен')
+    ]
+    status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус", default=OrderStatus.CREATED, choices=STATUS_CHOICES)
+    payment_status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус платежа")
     sent_to_group = models.BooleanField(default=False, verbose_name="Отправлено в группу")
 
     class Meta:
