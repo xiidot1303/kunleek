@@ -12,7 +12,7 @@ from telegram.ext import (
 from bot.resources.conversationList import *
 
 from bot.bot import (
-    main, login
+    main, login, admin_group
 )
 
 exceptions_for_filter_text = (~filters.COMMAND) & (~filters.Text(Strings.main_menu))
@@ -46,9 +46,21 @@ balance_handler = MessageHandler(
     main.balance
 )
 
+confirm_order_handler = CallbackQueryHandler(
+    pattern=r"confirm_order-(\d+)",
+    callback=admin_group.confirm_order
+)
+
+order_delivered_handler = CallbackQueryHandler(
+    pattern=r"delivered-(\d+)",
+    callback=admin_group.order_delivered
+)
+
 handlers = [
     login_handler,
     loyalty_card_handler,
     balance_handler,
+    confirm_order_handler,
+    order_delivered_handler,
     TypeHandler(type=NewsletterUpdate, callback=main.newsletter_update)
 ]

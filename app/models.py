@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from app.utils.data_classes import OrderStatus
+from app.utils.data_classes import *
     
 
 class Shop(models.Model):
@@ -129,8 +129,8 @@ class DeliveryType(models.Model):
     description_uz = models.TextField(null=True, blank=True, verbose_name="Описание (узбекский)")
     description_ru = models.TextField(null=True, blank=True, verbose_name="Описание (русский)")
     TYPE_CHOICES = [
-        ('express_yandex', 'Yandex'),
-        ('during_day', 'В течение дня'),
+        (DeliveryTypeTitle.ExpressYandex, 'Yandex'),
+        (DeliveryTypeTitle.DuringDay, 'В течение дня'),
     ]
     type = models.CharField(max_length=100, null=True, choices=TYPE_CHOICES, verbose_name="Тип")
     min_order_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Минимальная цена заказа")
@@ -217,7 +217,12 @@ class Order(models.Model):
     customer = models.ForeignKey(Customer, related_name='orders', on_delete=models.CASCADE, verbose_name="Клиент")
     shop = models.ForeignKey(Shop, null=True, related_name='orders', on_delete=models.SET_NULL, verbose_name="Магазин")
     delivery_type = models.ForeignKey(DeliveryType, on_delete=models.CASCADE, verbose_name="Тип доставки")
-    payment_method = models.CharField(max_length=50, verbose_name="Метод оплаты")
+    PAYMENT_METHOD_CHOICES = [
+        (PaymentMethod.CASH, 'Наличные'),
+        (PaymentMethod.PAYME, 'Payme'),
+        (PaymentMethod.CLICK, 'Click')
+    ]
+    payment_method = models.CharField(max_length=50, verbose_name="Метод оплаты", choices=PAYMENT_METHOD_CHOICES)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма")
     delivery_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена доставки")
     bonus_used = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Использованные бонусы")
@@ -231,6 +236,7 @@ class Order(models.Model):
     payment_system = models.CharField(max_length=50, blank=True, null=True, verbose_name="Платежная система")
     STATUS_CHOICES = [
         (OrderStatus.CREATED, 'Создан'),
+        (OrderStatus.NEED_CONFIRMATION, 'Нуждается в подтверждении'),
         (OrderStatus.READY_TO_APPROVAL, 'Готов к утверждению'),
         (OrderStatus.WAITING_DELIVERY_WORKING_HOURS, 'Ожидание рабочего времени доставки'),
         (OrderStatus.YANDEX_DELIVERING, 'Yandex Доставляется'),

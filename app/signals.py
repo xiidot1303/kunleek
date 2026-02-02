@@ -15,8 +15,12 @@ from app.services.error_handler import run_on_error
 @receiver(post_save, sender=Order)
 def handle_cash_payment_order(sender, instance: Order, created, **kwargs):
     if created and (instance.payment_method == "cash" or instance.total == 0):
-        instance.status = OrderStatus.READY_TO_APPROVAL
+        instance.status = OrderStatus.NEED_CONFIRMATION
         instance.save(update_fields=["status"])
+        # send order to group
+        transaction.on_commit(
+            lambda: send_order_info_to_group.delay(instance.id)
+        )
     elif created:
         # send invoice to user with order information
         transaction.on_commit(
@@ -34,15 +38,13 @@ def handle_order_payment_status_change(sender, instance: Order, **kwargs):
 
 @receiver(post_save, sender=Order)
 def handle_order_status_change(sender, instance: Order, **kwargs):
-    if instance.status == OrderStatus.READY_TO_APPROVAL and not instance.billz_id:
+    if instance.status == OrderStatus.READY_TO_APPROVAL and not instance.billz_id and not DEBUG:
         # send order to billz
-        if not DEBUG:
-            transaction.on_commit(
-                lambda: send_order_to_billz.delay(instance.id)
-            )
+        transaction.on_commit(
+            lambda: send_order_to_billz.delay(instance.id)
+        )
 
     elif instance.status == OrderStatus.READY_TO_APPROVAL and not instance.sent_to_group:
-        # Perform actions when payed changes to True
         instance.sent_to_group = True
         instance.save(update_fields=["sent_to_group"])
         transaction.on_commit(

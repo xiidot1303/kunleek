@@ -1,5 +1,6 @@
 class OrderStatus:
     CREATED = 'created'
+    NEED_CONFIRMATION = 'need_confirmation'
     READY_TO_APPROVAL = 'ready_to_approval'
     YANDEX_DELIVERING = 'yandex_delivering'
     DELIVERING = 'delivering'
@@ -17,3 +18,14 @@ class YandexTripStatus:
     PICKUP_ARRIVED = 'pickup_arrived'
     DELIVERY_ARRIVED = 'delivery_arrived'
     DELIVERED = 'delivered'
+
+
+class PaymentMethod:
+    CASH = 'cash'
+    PAYME = 'payme'
+    CLICK = 'click'
+
+
+class DeliveryTypeTitle:
+    ExpressYandex = 'express_yandex'
+    DuringDay = 'during_day'

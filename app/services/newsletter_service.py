@@ -7,6 +7,7 @@ from asgiref.sync import async_to_sync
 from payment.services import get_invoice_url
 from bot.services.string_service import *
 from app.utils.tg_bot import send_newsletter_api
+from app.utils.data_classes import *
 
 
 @shared_task
@@ -26,7 +27,7 @@ def send_order_info_to_group(order_id: int):
 
     text = (
         f"🆕 Новый заказ!\n\n"
-        f"🆔 ID заказа: #{order.billz_id}\n"
+        f"🆔 ID заказа: #{order.billz_id or order.id}\n"
         f"🏬 Магазин: {order.shop.name}\n"
         f"👤 Клиент: {order.customer.first_name}\n"
         f"📞 Телефон клиента: {order.customer.phone}\n"
@@ -48,7 +49,22 @@ def send_order_info_to_group(order_id: int):
         f"🔹 Дата регистрации: {bot_user.date.strftime('%Y-%m-%d %H:%M:%S')}\n"
     )
 
-    send_newsletter_api(bot_user_id=GROUP_ID, text=text)
+    inline_buttons = []
+    # send confirm order button if order status is need_confirmation
+    if order.status == OrderStatus.NEED_CONFIRMATION:
+        inline_buttons = [
+            [{
+                "text": "Подтвердить заказ",
+                "callback_data": f"confirm_order-{order.id}"
+            }]
+        ]
+    elif order.delivery_type.type == DeliveryTypeTitle.DuringDay:
+        inline_buttons = [[{
+            "text": "🚚 Доставлен",
+            "callback_data": f"delivered-{order.id}"
+        }]]
+
+    send_newsletter_api(bot_user_id=GROUP_ID, text=text, inline_buttons=inline_buttons)
     location = {"latitude": order.latitude, "longitude": order.longitude}
     send_newsletter_api(bot_user_id=GROUP_ID, location=location)
 
