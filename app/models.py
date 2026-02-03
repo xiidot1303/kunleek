@@ -131,6 +131,7 @@ class DeliveryType(models.Model):
     TYPE_CHOICES = [
         (DeliveryTypeTitle.ExpressYandex, 'Yandex'),
         (DeliveryTypeTitle.DuringDay, 'В течение дня'),
+        (DeliveryTypeTitle.ForTest, 'Тестовая доставка'),
     ]
     type = models.CharField(max_length=100, null=True, choices=TYPE_CHOICES, verbose_name="Тип")
     min_order_price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="Минимальная цена заказа")

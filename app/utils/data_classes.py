@@ -30,3 +30,4 @@ class PaymentMethod:
 class DeliveryTypeTitle:
     ExpressYandex = 'express_yandex'
     DuringDay = 'during_day'
+    ForTest = 'for_test'
