@@ -10,6 +10,8 @@ from bot.services import *
 from bot.resources.conversationList import *
 from app.services import filter_objects_sync
 from config import WEBAPP_URL
+from bot.services.redis_service import get_user_lang
+from asgiref.sync import sync_to_async
 
 
 async def is_message_back(update: Update):
@@ -28,8 +30,9 @@ async def main_menu(update: Update, context: CustomContext):
             Strings(update.effective_user.id).balance
         ],
     ]
-
-    webapp = WebAppInfo(url=f"{WEBAPP_URL}?selectlocation=yes")
+    user_lang_code = await sync_to_async(get_user_lang)(update.effective_user.id)
+    lang = 'uz' if user_lang_code == 0 else 'ru'
+    webapp = WebAppInfo(url=f"{WEBAPP_URL}?selectlocation=yes&lang={lang}")
 
     markup = ReplyKeyboardMarkup(
         keyboard=buttons,
