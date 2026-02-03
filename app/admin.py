@@ -323,6 +323,10 @@ class OrderReviewInline(admin.TabularInline):
 class OrderResource(resources.ModelResource):
     items = fields.Field()
     reviews = fields.Field()
+    shop = fields.Field(attribute='shop__name')
+    delivery_type = fields.Field(attribute='delivery_type__title_ru')
+    bot_user = fields.Field(attribute='bot_user__name')
+    customer = fields.Field(attribute='customer__first_name')
 
     def dehydrate_items(self, order):
         return "\n".join(
