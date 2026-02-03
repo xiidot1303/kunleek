@@ -58,6 +58,21 @@ async def balance(update: Update, context: CustomContext):
     )
 
 
+async def change_language(update: Update, context: CustomContext):
+    bot_user = await get_object_by_update(update)
+    if not bot_user:
+        return
+
+    # Change the user's language
+    # send message
+    reply_markup = await switch_languages_inline_keyboard(context)
+    await update.message.reply_text(
+        context.words.select_language,
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup
+    )
+
+
 async def newsletter_update(update: NewsletterUpdate, context: CustomContext):
     bot = context.bot
     if not (update.photo or update.video or update.document or update.location):

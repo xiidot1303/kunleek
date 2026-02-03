@@ -22,13 +22,17 @@ async def is_message_back(update: Update):
 
 
 async def main_menu(update: Update, context: CustomContext):
-    update = update.callback_query if update.callback_query else update
+    if update.callback_query:
+        await update.effective_message.delete()
     bot = context.bot
     buttons = [
         [
             Strings(update.effective_user.id).loyalty_card,
             Strings(update.effective_user.id).balance
         ],
+        [
+            Strings(update.effective_user.id).change_lang
+        ]
     ]
     user_lang_code = await sync_to_async(get_user_lang)(update.effective_user.id)
     lang = 'uz' if user_lang_code == 0 else 'ru'
@@ -40,7 +44,7 @@ async def main_menu(update: Update, context: CustomContext):
     )
 
     await bot.send_message(
-        update.message.chat_id,
+        update.effective_message.chat_id,
         context.words.main_menu,
         reply_markup=markup,
     )

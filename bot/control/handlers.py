@@ -12,7 +12,7 @@ from telegram.ext import (
 from bot.resources.conversationList import *
 
 from bot.bot import (
-    main, login, admin_group
+    main, login, admin_group, setting
 )
 
 exceptions_for_filter_text = (~filters.COMMAND) & (~filters.Text(Strings.main_menu))
@@ -56,11 +56,30 @@ order_delivered_handler = CallbackQueryHandler(
     callback=admin_group.order_delivered
 )
 
+change_language_handler = MessageHandler(
+    filters.Text(Strings.change_lang) & exceptions_for_filter_text,
+    main.change_language
+)
+
+switch_language_handler = CallbackQueryHandler(
+    pattern=r"set_lang-(\d+)",
+    callback=setting.switch_language
+)
+
+main_menu_handler = CallbackQueryHandler(
+    pattern=r"main_menu",
+    callback=main.main_menu
+)
+
+
 handlers = [
     login_handler,
     loyalty_card_handler,
     balance_handler,
     confirm_order_handler,
     order_delivered_handler,
+    change_language_handler,
+    switch_language_handler,
+    main_menu_handler,
     TypeHandler(type=NewsletterUpdate, callback=main.newsletter_update)
 ]
