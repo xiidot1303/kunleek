@@ -13,11 +13,10 @@ def create_shop_from_billz(shops_data):
             break
 
         # Create or update the shop in the local database
-        shop_instance, created = Shop.objects.update_or_create(
+        shop_instance, created = Shop.objects.get_or_create(
             shop_id=shop_id,
             defaults={
                 "name": shop_name,
-                "shop_id": shop_id,
                 "cashbox_id": cashbox_id
             }
         )
