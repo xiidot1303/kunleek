@@ -21,3 +21,5 @@ def create_shop_from_billz(shops_data):
                 "cashbox_id": cashbox_id
             }
         )
+        shop_instance.cashbox_id = cashbox_id
+        shop_instance.save(update_fields=["cashbox_id"])
