@@ -24,3 +24,11 @@ shop_id_param = openapi.Parameter(
     description='Shop ID',
     type=openapi.TYPE_INTEGER
 )
+
+user_id_param = openapi.Parameter(
+    'user_id',
+    openapi.IN_QUERY,
+    description='User ID',
+    type=openapi.TYPE_STRING,
+    required=False
+)

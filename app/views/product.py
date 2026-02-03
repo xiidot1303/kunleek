@@ -23,7 +23,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method='get',
-        manual_parameters=[product_by_name_param, shop_id_param],
+        manual_parameters=[product_by_name_param, shop_id_param, user_id_param],
         responses={200: openapi.Response('Products found by name', ProductSerializer(many=True))}
     )
     @action(detail=False, methods=['get'], url_path='by-name')
@@ -39,7 +39,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
-    @swagger_auto_schema(manual_parameters=[shop_id_param])
+    @swagger_auto_schema(manual_parameters=[shop_id_param, user_id_param])
     @action(detail=False, methods=['get'], url_path='discounted')
     def discounted(self, request):
         """
@@ -49,7 +49,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
-    @swagger_auto_schema(manual_parameters=[shop_id_param])
+    @swagger_auto_schema(manual_parameters=[shop_id_param, user_id_param])
     @action(detail=False, methods=['get'], url_path='by-category/(?P<category_id>[^/.]+)')
     def by_category(self, request, category_id=None):
         """
@@ -113,3 +113,13 @@ class ProductViewSet(viewsets.ModelViewSet):
             "min_price": min_price,
             "max_price": max_price
         })
+    
+    @swagger_auto_schema(manual_parameters=[shop_id_param])
+    @action(detail=False, methods=['get'], url_path='pack')
+    def pack(self, request):
+        """
+        Get all products that are packs.
+        """
+        products = self.get_queryset().filter(is_pack=True).first()
+        serializer = self.get_serializer(products)
+        return Response(serializer.data)

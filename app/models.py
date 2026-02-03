@@ -89,6 +89,7 @@ class Product(models.Model):
     sku = models.CharField(null=True, blank=True, max_length=100, verbose_name="Артикул (SKU)")
     mxik = models.CharField(max_length=100, null=True, blank=True, verbose_name="МХИК")
     package_code = models.CharField(max_length=100, null=True, blank=True, verbose_name="Код упаковки")
+    is_pack = models.BooleanField(default=False, verbose_name="Пакет?")
     active = models.BooleanField(null=True, default=False)
     
     
