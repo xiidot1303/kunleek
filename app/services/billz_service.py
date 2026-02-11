@@ -202,8 +202,8 @@ class BillzService:
                 "name": "Payme"
             },
             "click": {
-                "id": "6f443ced-4915-4336-b177-c37e5738110e",
-                "name": "Терминал"
+                "id": "49677309-d2c4-4dd8-8e9f-c9d05776ef71",
+                "name": "Payme"
             }
         }
         url = f"{self.url}v2/order-payment/{self.order_id}"
