@@ -36,22 +36,30 @@ def handle_cash_payment_order(sender, instance: Order, created, **kwargs):
 
 
 @receiver(post_save, sender=Order)
-def handle_order_payment_status_change(sender, instance: Order, **kwargs):
-    if instance.payed and instance.status == OrderStatus.CREATED:
+def handle_order_status_change(sender, instance: Order, update_fields, **kwargs):
+    if not update_fields:
+        return
+    
+    if "payed" in update_fields and instance.payed and instance.status == OrderStatus.CREATED:
         # change order status
         instance.status = OrderStatus.READY_TO_APPROVAL
         instance.save(update_fields=["status"])
-
-
-@receiver(post_save, sender=Order)
-def handle_order_status_change(sender, instance: Order, **kwargs):
-    if instance.status == OrderStatus.READY_TO_APPROVAL and not instance.billz_id and not DEBUG:
+    elif (
+        instance.status == OrderStatus.READY_TO_APPROVAL
+          and "status" in update_fields
+          and not instance.billz_id 
+          and not DEBUG
+        ):
         # send order to billz
         transaction.on_commit(
             lambda: send_order_to_billz.delay(instance.id)
         )
 
-    elif instance.status == OrderStatus.READY_TO_APPROVAL and not instance.sent_to_group:
+    elif (
+        instance.status == OrderStatus.READY_TO_APPROVAL 
+        and not instance.sent_to_group
+        and "billz_id" in update_fields
+        ):
         instance.sent_to_group = True
         instance.save(update_fields=["sent_to_group"])
         transaction.on_commit(
@@ -59,8 +67,9 @@ def handle_order_status_change(sender, instance: Order, **kwargs):
         )
     
     elif (
-            instance.status == OrderStatus.READY_TO_APPROVAL and
-            instance.delivery_type.type == 'express_yandex'
+            instance.status == OrderStatus.READY_TO_APPROVAL
+            and instance.delivery_type.type == 'express_yandex'
+            and "sent_to_group" in update_fields
         ):
         # Delivery
         if not DEBUG:
@@ -72,13 +81,13 @@ def handle_order_status_change(sender, instance: Order, **kwargs):
                 instance.status = OrderStatus.WAITING_DELIVERY_WORKING_HOURS
                 instance.save(update_fields=["status"])
 
-    elif instance.status == OrderStatus.DELIVERED:
+    elif instance.status == OrderStatus.DELIVERED and "status" in update_fields:
         # ask review from bot user
         transaction.on_commit(
             lambda: ask_review_from_user.delay(instance.id)
         )
 
-    elif OrderStatus.is_error(instance.status):
+    elif OrderStatus.is_error(instance.status) and "status" in update_fields:
         # send error notification to client
         notify_client_order_error(instance.id)
 

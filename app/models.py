@@ -244,7 +244,8 @@ class Order(models.Model):
         (OrderStatus.YANDEX_DELIVERING, 'Yandex Доставляется'),
         (OrderStatus.DELIVERING, 'Доставляется'),
         (OrderStatus.DELIVERED, 'Доставлен'),
-        (OrderStatus.RATED, 'Оценен')
+        (OrderStatus.RATED, 'Оценен'),
+        (OrderStatus.ERROR_IN_BILLZ_API, 'Error Billz API')
     ]
     status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус", default=OrderStatus.CREATED, choices=STATUS_CHOICES)
     payment_status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус платежа")
