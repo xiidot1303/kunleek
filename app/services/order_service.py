@@ -54,7 +54,7 @@ async def get_order_by_id(id: int | str) -> Order | None:
 async def order_pay(order: Order, payment_system):
     order.payed = True
     order.payment_system = payment_system
-    await order.asave(update_fields=['payed'])
+    await order.asave(update_fields=['payed', 'payment_system'])
 
 
 @sync_to_async
