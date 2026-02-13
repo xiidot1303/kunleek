@@ -50,4 +50,7 @@ async def cancel_order_payment(order: Account) -> str:
         payment: Click_transaction = await Click_transaction.objects.aget(order_id=order.id)
         response = await sync_to_async(payment_cancel)(payment.click_paydoc_id)
         code = response.get("error_code", -1)
+        if code == 0:
+            payment.status = "canceled"
+            await payment.asave(update_fields=["status"])
         return "success" if code == 0 else "error"
