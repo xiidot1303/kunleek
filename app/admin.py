@@ -12,6 +12,7 @@ from django.db import transaction
 from django.db.models import F
 from import_export import resources, fields
 from import_export.admin import ExportMixin
+from payment.admin import PaymeTransactionInline
 
 
 def fetch_shops_manually(request):
@@ -342,7 +343,6 @@ class OrderResource(resources.ModelResource):
     class Meta:
         model = Order
 
-
 @admin.register(Order)
 class OrderAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OrderResource
@@ -351,7 +351,7 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
     search_fields = ('customer__first_name',
                      'delivery_type__title_en', 'payment_method')
     list_filter = ('delivery_type', 'payment_method', 'created_at', 'shop')
-    inlines = [OrderItemInline, OrderReviewInline]
+    inlines = [OrderItemInline, OrderReviewInline, PaymeTransactionInline]
 
 
 @admin.register(FavoriteProduct)

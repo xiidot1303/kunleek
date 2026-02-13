@@ -1,7 +1,9 @@
 from django.db import models
+from app.models import Order
 
 
 class Payme_transaction(models.Model):
+    order = models.ForeignKey(Order, null=True, blank=True, on_delete=models.CASCADE)
     payme_trans_id = models.CharField(null=True, blank=False, max_length=64)
     account_id = models.CharField(null=True, blank=False, max_length=128)
     amount = models.BigIntegerField(null=True, blank=True)

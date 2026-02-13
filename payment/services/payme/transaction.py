@@ -2,6 +2,7 @@ from app.services import *
 from payment.services import *
 from payment.models import Payme_transaction as Trans
 from payment.utils import time_ts
+from payment.models import Order
 
 
 async def get_or_create_transaction(
@@ -9,6 +10,7 @@ async def get_or_create_transaction(
         amount, time, create_time, test) -> Trans:
     obj, created = await Trans.objects.aget_or_create(payme_trans_id=payme_trans_id)
     if created:
+        obj.order = account,
         obj.account_id = account.id
         obj.amount = amount
         obj.time = time
