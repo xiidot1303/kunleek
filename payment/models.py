@@ -28,3 +28,12 @@ class Payme_transaction(models.Model):
     ]
     reason = models.IntegerField(null=True, blank=True, choices=REASON_CHOICES)
     test = models.BooleanField(null=True, default=False)
+
+
+class Click_transaction(models.Model):
+    order = models.ForeignKey(Order, null=True, blank=True, on_delete=models.CASCADE)
+    click_trans_id = models.CharField(null=True, blank=False, max_length=64)
+    click_paydoc_id = models.BigIntegerField(null=True, blank=False)
+    amount = models.BigIntegerField(null=True, blank=False)
+    status = models.CharField(null=True, blank=True, max_length=50)
+    sign_time = models.CharField(null=True, blank=True, max_length=50)

@@ -5,13 +5,14 @@ from app.services.order_service import (
 )
 # from bot.services import notification_service as notify
 from app.models import Order as Account
+from payment.models import Payme_transaction, Click_transaction
 from payment.services.payme.subscribe_api import (
     receipts_create_api as get_payme_invoice_id,
     receipts_cancel_api as cancel_payme_payment
     )
 from payment.services.click import get_click_invoice_url
-from payment.models import Payme_transaction
-
+from payment.services.click.merchant_api import payment_cancel
+from asgiref.sync import sync_to_async
 
 
 async def get_invoice_url(payment_id, amount, payment_system):
@@ -44,3 +45,9 @@ async def cancel_order_payment(order: Account) -> str:
         response = await cancel_payme_payment(receipt.payme_trans_id)
         result = response.get("result", None)
         return "success" if result else "error"
+
+    elif str(order.payment_system).lower() == "click":
+        payment: Click_transaction = await Click_transaction.objects.aget(order_id=order.id)
+        response = await sync_to_async(payment_cancel)(payment.click_paydoc_id)
+        code = response.get("error_code", -1)
+        return "success" if code == 0 else "error"

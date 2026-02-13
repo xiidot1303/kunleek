@@ -8,6 +8,7 @@ from django.conf import settings
 import hashlib
 
 from payment.services import *
+from payment.services.click.transaction import *
 # from bot.services import notification_service as notify
 from adrf.requests import AsyncRequest
 from asgiref.sync import async_to_sync
@@ -43,6 +44,15 @@ def click_webhook_errors(request: AsyncRequest):
     sign_time = request.data.get('sign_time', None)
     sign_string = request.data.get('sign_string', None)
     merchant_prepare_id = request.data.get('merchant_prepare_id', None) if action != None and action == '1' else ''
+    order = order_load(order_id)
+
+    click_transaction: Click_transaction = get_or_create_click_transaction(
+        order=order,
+        click_trans_id=click_trans_id,
+        click_paydoc_id=click_paydoc_id,
+        amount=amount,
+        sign_time=sign_time
+    )
 
     if isset(request.data, ['click_trans_id', 'service_id', 'click_paydoc_id', 'amount', 'action', 'error', 'error_note', 'sign_time', 'sign_string']) or (
         action == '1' and isset(request.data, ['merchant_prepare_id'])):
@@ -68,7 +78,6 @@ def click_webhook_errors(request: AsyncRequest):
             'error_note' : _('Action not found')
         }
     
-    order = order_load(order_id)
     if not order:
         return {
             'error' : '-5',
@@ -81,7 +90,7 @@ def click_webhook_errors(request: AsyncRequest):
             'error_note' : _('Incorrect parameter amount')
         }
 
-    if order.payment_status == PaymentStatus.CONFIRMED or order.payed:
+    if click_transaction.status == PaymentStatus.CONFIRMED or order.payed:
         return {
             'error' : '-4',
             'error_note' : _('Already paid')
@@ -96,7 +105,7 @@ def click_webhook_errors(request: AsyncRequest):
                 'error_note' : _('Transaction not found')
             }
 
-    if order.payment_status == PaymentStatus.REJECTED or int(error) < 0:
+    if click_transaction.status == PaymentStatus.REJECTED or int(error) < 0:
         return {
             'error' : '-9',
             'error_note' : _('Transaction cancelled')
@@ -111,9 +120,10 @@ def prepare(request: AsyncRequest):
     order_id = request.data.get('merchant_trans_id', None)
     result = click_webhook_errors(request)
     order = order_load(order_id)
+    click_transaction: Click_transaction = get_click_transaction(order=order)
     if result['error'] == '0':
-        order.payment_status = PaymentStatus.WAITING
-        order.save()
+        click_transaction.status = PaymentStatus.WAITING
+        click_transaction.save()
     result['click_trans_id'] = request.data.get('click_trans_id', None)
     result['merchant_trans_id'] = request.data.get('merchant_trans_id', None)
     result['merchant_prepare_id'] = request.data.get('merchant_trans_id', None)
@@ -124,12 +134,13 @@ def complete(request: AsyncRequest):
     order_id = request.data.get('merchant_trans_id', None)
     order = order_load(order_id)
     result = click_webhook_errors(request)
+    click_transaction: Click_transaction = get_click_transaction(order=order)
     if request.data.get('error', None) != None and int(request.data.get('error', None)) < 0:
-        order.payment_status = PaymentStatus.REJECTED
-        order.save()
+        click_transaction.status = PaymentStatus.REJECTED
+        click_transaction.save()
     if result['error'] == '0':
-        order.payment_status = PaymentStatus.CONFIRMED
-        order.save()
+        click_transaction.status = PaymentStatus.CONFIRMED
+        click_transaction.save()
         async_to_sync(account_pay)(order, 'click')
 
     result['click_trans_id'] = request.data.get('click_trans_id', None)
