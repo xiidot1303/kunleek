@@ -8,7 +8,8 @@ from app.services.newsletter_service import (
     notify_client_order_error,
     ask_review_from_user,
     send_gratitude_to_client,
-    send_gratitude_for_review_to_client
+    send_gratitude_for_review_to_client,
+    notify_client_order_cancellation
     )
 from app.services.order_service import send_order_to_billz
 from django.db import transaction
@@ -17,6 +18,8 @@ from config import DEBUG
 from app.utils.data_classes import OrderStatus, YandexTripStatus
 from celery.signals import task_failure
 from app.services.error_handler import run_on_error
+from payment.services import cancel_order_payment
+from asgiref.sync import async_to_sync
 
 
 @receiver(post_save, sender=Order)
@@ -87,9 +90,24 @@ def handle_order_status_change(sender, instance: Order, update_fields, **kwargs)
             lambda: ask_review_from_user.delay(instance.id)
         )
 
-    elif OrderStatus.is_error(instance.status) and "status" in update_fields:
+    elif instance.status in [OrderStatus.ERROR_IN_BILLZ_API] and "status" in update_fields:
         # send error notification to client
-        notify_client_order_error(instance.id)
+        transaction.on_commit(
+            lambda: notify_client_order_error.delay(instance.id)
+        )
+        # cancel payment
+        status = async_to_sync(cancel_order_payment)(instance)
+        if status == "success":
+            instance.status = OrderStatus.PAYMENT_RETURNED
+            instance.save(update_fields=None)
+        elif status == "error":
+            instance.status = OrderStatus.PAYMENT_RETURN_ERROR
+            instance.save(update_fields=None)
+        if instance.payment_method != PaymentMethod.CASH:
+            transaction.on_commit(
+                lambda: notify_client_order_cancellation.delay(instance.id)
+            )
+
 
 @receiver(post_save, sender=OrderItem)
 def handle_order_item_creation(sender, instance: OrderItem, created, **kwargs):

@@ -187,6 +187,28 @@ def notify_client_order_error(order_id):
     )
 
 @shared_task
+def notify_client_order_cancellation(order_id):
+    order: Order = Order.objects.get(pk=order_id)
+    bot_user: Bot_user = order.bot_user
+    if order.status == OrderStatus.PAYMENT_RETURNED:
+        text = Strings.order_payment_returned[bot_user.lang]
+        text = text.format(
+            order_id=order.billz_id or order.id,
+            amount=order.total,
+            payment_system=order.payment_method
+        )
+    elif order.status == OrderStatus.PAYMENT_RETURN_ERROR:
+        text = Strings.order_payment_return_error[bot_user.lang].format(order_id=order.id)
+        text = text.format(
+            order_id=order.billz_id or order.id
+        )
+
+    send_newsletter_api(
+        bot_user_id=bot_user.user_id,
+        text=text
+    )
+
+@shared_task
 def ask_review_from_user(order_id):
     order: Order = Order.objects.get(pk=order_id)
     bot_user: Bot_user = order.bot_user

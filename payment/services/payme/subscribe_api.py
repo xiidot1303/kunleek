@@ -36,3 +36,18 @@ async def receipts_pay_api(receipt_id, token) -> dict:
     )
     response = await checkout_request.send()
     return response
+
+
+async def receipts_cancel_api(receipt_id) -> dict:
+    """
+    Reponse: {result: receipt}
+    """
+    method = "receipts.cancel"
+    params = {
+        "id": receipt_id
+    }
+    checkout_request = await CheckoutEndpointRequest.create(
+        method, params, RequestType.POST
+    )
+    response = await checkout_request.send()
+    return response

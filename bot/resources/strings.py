@@ -187,14 +187,18 @@ class Strings:
         "Подтвердить"
     ]
 
-    _ = [
-        "",
-        ""
+    order_payment_returned = [
+        "<b>Buyurtma #{order_id} to'lovi bekor qilindi ↩️</b>\n\n" \
+        "▪️ Miqdor: {amount}\n" \
+        "▪️ To'lov tizimi: {payment_system}",
+        "<b>Оплата заказа #{order_id} возвращена ↩️</b>\n\n" \
+        "▪️ Сумма: {amount}\n" \
+        "▪️ Платежная система: {payment_system}",
     ]
 
-    _ = [
-        "",
-        ""
+    order_payment_return_error = [
+        "<b>Buyurtma #{order_id} to'lovini bekor qilish jarayonida xatolik yuz berdi, iltimos operator bilan bog'laning</b>",
+        "<b>Ошибка при отмене оплаты заказа #{order_id}, пожалуйста, свяжитесь с оператором</b>"
     ]
 
     _ = [

@@ -245,7 +245,9 @@ class Order(models.Model):
         (OrderStatus.DELIVERING, 'Доставляется'),
         (OrderStatus.DELIVERED, 'Доставлен'),
         (OrderStatus.RATED, 'Оценен'),
-        (OrderStatus.ERROR_IN_BILLZ_API, 'Error Billz API')
+        (OrderStatus.ERROR_IN_BILLZ_API, 'Error Billz API'),
+        (OrderStatus.PAYMENT_RETURNED, 'Возврат платежа'),
+        (OrderStatus.PAYMENT_RETURN_ERROR, 'Ошибка возврата платежа'),
     ]
     status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус", default=OrderStatus.CREATED, choices=STATUS_CHOICES)
     payment_status = models.CharField(max_length=50, null=True, blank=True, verbose_name="Статус платежа")
