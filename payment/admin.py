@@ -12,5 +12,10 @@ class PaymeTransactionInline(admin.TabularInline):
     can_delete = False
     verbose_name_plural = "оплаты Payme"
 
+class ClickTransactionInline(admin.TabularInline):
+    model = Click_transaction
+    extra = 0
+    can_delete = False
+    verbose_name_plural = "оплаты Click"
 
 admin.site.register(Payme_transaction, Payme_transactionAdmin)
