@@ -11,10 +11,19 @@ class CategorySerializer(serializers.ModelSerializer):
         ]
 
     def get_subcategories(self, obj):
-        # recursively serialize subcategories
-        if obj.subcategories.exists():
-            return CategorySerializer(obj.subcategories.all(), many=True).data
-        return []
+        # Use prefetched in-memory children when available to avoid DB hits.
+        children = getattr(obj, 'prefetched_subcategories', None)
+        if children is None:
+            # fallback to related manager (may hit DB)
+            qs = obj.subcategories.all()
+            if not qs.exists():
+                return []
+            return CategorySerializer(qs, many=True).data
+
+        # recursively serialize the prefetched children
+        if not children:
+            return []
+        return CategorySerializer(children, many=True).data
 
 class DiscountCategorySerializer(serializers.ModelSerializer):
     class Meta:
