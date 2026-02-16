@@ -128,7 +128,6 @@ def check_price(latitude: float, longitude: float):
         headers=headers,
         json=data
     )
-    print(response.json())
     price = response.json().get("price")
 
     return price
