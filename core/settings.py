@@ -119,12 +119,13 @@ ASGI_APPLICATION = 'core.asgi.application'
 if not DEBUG:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": DB_NAME,
             "USER": DB_USER,
             "PASSWORD": DB_PASSWORD,
             "HOST": DB_HOST,
             "PORT": DB_PORT,
+            "CONN_MAX_AGE": 0 # if use pgbouncer
         }
     }
 else:
