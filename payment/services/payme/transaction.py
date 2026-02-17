@@ -8,16 +8,17 @@ from payment.models import Order
 async def get_or_create_transaction(
         payme_trans_id, account: Account,
         amount, time, create_time, test) -> Trans:
-    obj, created = await Trans.objects.aget_or_create(payme_trans_id=payme_trans_id)
-    if created:
-        obj.order = account,
-        obj.account_id = account.id
-        obj.amount = amount
-        obj.time = time
-        obj.create_time = create_time
-        obj.state = 1
-        obj.test = test
-        await obj.asave()
+    obj, created = await Trans.objects.aget_or_create(
+        payme_trans_id=payme_trans_id, defaults={
+            "order": account,
+            "account_id": account.id,
+            "amount": amount,
+            "time": time,
+            "create_time": create_time,
+            "state": 1,
+            "test": test
+        })
+
     return obj
 
 
