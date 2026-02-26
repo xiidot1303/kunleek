@@ -42,7 +42,7 @@ class ShopAdmin(admin.ModelAdmin):
     search_fields = ('name', 'shop_id', 'cashbox_id')
     list_filter = ('is_active',)
     ordering = ('name',)
-    list_editable = ('is_active', 'latitude', 'longitude', 'address', 'tg_group_id')
+    list_editable = ('is_active', 'latitude', 'longitude', 'address', 'tg_group_id', 'phone')
 
     def get_urls(self):
         urls = super().get_urls()
