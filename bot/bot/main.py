@@ -6,6 +6,8 @@ import html
 from django.db import close_old_connections
 from bot.services.barcode_service import generate_barcode
 from app.services.billz_service import BillzService, ClientDetails, APIMethods
+from telegram.error import TimedOut
+import asyncio
 
 
 async def start(update: Update, context: CustomContext):
@@ -75,52 +77,58 @@ async def change_language(update: Update, context: CustomContext):
 
 async def newsletter_update(update: NewsletterUpdate, context: CustomContext):
     bot = context.bot
-    if not (update.photo or update.video or update.document or update.location):
-        # send text message
-        message = await bot.send_message(
-            chat_id=update.user_id,
-            text=update.text,
-            reply_markup=update.reply_markup,
-            parse_mode=ParseMode.HTML
-        )
+    while True:
+        try:
+            if not (update.photo or update.video or update.document or update.location):
+                # send text message
+                message = await bot.send_message(
+                    chat_id=update.user_id,
+                    text=update.text,
+                    reply_markup=update.reply_markup,
+                    parse_mode=ParseMode.HTML
+                )
 
-    if update.photo:
-        # send photo
-        message = await bot.send_photo(
-            update.user_id,
-            update.photo,
-            caption=update.text,
-            reply_markup=update.reply_markup,
-            parse_mode=ParseMode.HTML,
-        )
-    if update.video:
-        # send video
-        message = await bot.send_video(
-            update.user_id,
-            update.video,
-            caption=update.text,
-            reply_markup=update.reply_markup,
-            parse_mode=ParseMode.HTML,
-        )
-    if update.document:
-        # send document
-        message = await bot.send_document(
-            update.user_id,
-            update.document,
-            caption=update.text,
-            reply_markup=update.reply_markup,
-            parse_mode=ParseMode.HTML,
-        )
-    if update.location:
-        # send location
-        message = await bot.send_location(
-            chat_id=update.user_id,
-            latitude=update.location.get('latitude'),
-            longitude=update.location.get('longitude')
-        )
-    if update.pin_message:
-        await bot.pin_chat_message(chat_id=update.user_id, message_id=message.message_id)
+            if update.photo:
+                # send photo
+                message = await bot.send_photo(
+                    update.user_id,
+                    update.photo,
+                    caption=update.text,
+                    reply_markup=update.reply_markup,
+                    parse_mode=ParseMode.HTML,
+                )
+            if update.video:
+                # send video
+                message = await bot.send_video(
+                    update.user_id,
+                    update.video,
+                    caption=update.text,
+                    reply_markup=update.reply_markup,
+                    parse_mode=ParseMode.HTML,
+                )
+            if update.document:
+                # send document
+                message = await bot.send_document(
+                    update.user_id,
+                    update.document,
+                    caption=update.text,
+                    reply_markup=update.reply_markup,
+                    parse_mode=ParseMode.HTML,
+                )
+            if update.location:
+                # send location
+                message = await bot.send_location(
+                    chat_id=update.user_id,
+                    latitude=update.location.get('latitude'),
+                    longitude=update.location.get('longitude')
+                )
+            if update.pin_message:
+                await bot.pin_chat_message(chat_id=update.user_id, message_id=message.message_id)
 
+            break
+        except TimedOut:
+            await asyncio.sleep(0.5)
+            continue
 
 ###############################################################################################
 ###############################################################################################
