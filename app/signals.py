@@ -118,8 +118,8 @@ def handle_order_item_creation(sender, instance: OrderItem, created, **kwargs):
 
 
 @receiver(post_save, sender=YandexTrip)
-def handle_yandex_trip_status_change(sender, instance: YandexTrip, **kwargs):
-    if instance.status == YandexTripStatus.DELIVERED:
+def handle_yandex_trip_status_change(sender, instance: YandexTrip, update_fields, **kwargs):
+    if instance.status == YandexTripStatus.DELIVERED and "status" in update_fields:
         # Perform actions when the Yandex trip is delivered
         order: Order = instance.order
         order.status = OrderStatus.DELIVERED

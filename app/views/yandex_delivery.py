@@ -52,7 +52,7 @@ class YandexDeliveryView(APIView):
                 send_gratitude_to_client.delay(yandex_trip.id)
 
         yandex_trip.status = callback.status
-        yandex_trip.save()
+        yandex_trip.save(update_fields=["status"])
 
         # Process the callback data as needed
         return Response({"status": "callback received"}, status=200)
