@@ -1,5 +1,5 @@
 from celery import shared_task
-from app.models import Order, YandexTrip
+from app.models import Order, YandexTrip, Shop
 from app.services import *
 from config import YANDEX_DELIVERY_API_KEY, YANDEX_DELIVERY_URL, YANDEX_DELIVERY_CALLBACK_URL
 from app.utils.data_classes import OrderStatus
@@ -21,6 +21,7 @@ headers = {
 @shared_task
 def create_claim(order_id: int):
     order: Order = Order.objects.get(id=order_id)
+    shop: Shop = order.shop
     # Prepare data for Yandex Delivery API
     data = {
         "items": [
@@ -36,8 +37,8 @@ def create_claim(order_id: int):
         "route_points": [
             {
                 "address": {
-                    "fullname": "3-й проезд Эшона Бобохонова, 41, Ташкент",
-                    "coordinates": [69.203140, 41.213730]
+                    "fullname": shop.address or "Tashkent",
+                    "coordinates": [shop.longitude, shop.latitude]
                 },
                 "contact": {
                     "name": "Kunleek online store",
