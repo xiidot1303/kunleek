@@ -12,6 +12,7 @@ class Shop(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Долгота")
     address = models.CharField(null=True, blank=True, max_length=255, verbose_name="Адрес")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
+    tg_group_id = models.CharField(null=True, blank=True, max_length=32, verbose_name="ID группы Telegram")
 
     def __str__(self):
         return self.name

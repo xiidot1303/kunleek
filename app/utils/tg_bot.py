@@ -1,6 +1,6 @@
 from celery import shared_task
 import requests
-from config import WEBHOOK_URL, GROUP_ID
+from config import WEBHOOK_URL
 
 
 @shared_task

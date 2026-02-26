@@ -1,5 +1,4 @@
 from celery import shared_task
-from config import WEBHOOK_URL, GROUP_ID
 from app.models import Order, OrderReview
 from bot.models import Bot_user
 from bot import Strings
@@ -65,9 +64,9 @@ def send_order_info_to_group(order_id: int):
             "callback_data": f"delivered-{order.id}"
         }]]
 
-    send_newsletter_api(bot_user_id=GROUP_ID, text=text, inline_buttons=inline_buttons)
+    send_newsletter_api(bot_user_id=order.shop.tg_group_id, text=text, inline_buttons=inline_buttons)
     location = {"latitude": order.latitude, "longitude": order.longitude}
-    send_newsletter_api(bot_user_id=GROUP_ID, location=location)
+    send_newsletter_api(bot_user_id=order.shop.tg_group_id, location=location)
 
 
 @shared_task
@@ -123,7 +122,7 @@ def notify_admin_about_performer_arrived(yandex_trip_id):
     order: Order = yandex_trip.order
     text = perfomer_arrived_pickup_string(yandex_trip)
     send_newsletter_api(
-        bot_user_id=GROUP_ID,
+        bot_user_id=order.shop.tg_group_id,
         text = text
     )
 
@@ -149,7 +148,7 @@ def notify_admin_order_delivered(yandex_trip_id):
         order_id = order.id
     )
     send_newsletter_api(
-        bot_user_id=GROUP_ID,
+        bot_user_id=order.shop.tg_group_id,
         text = text
     )
 

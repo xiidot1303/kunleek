@@ -38,11 +38,11 @@ def fetch_products_manually(request):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'latitude', 'longitude', 'is_active')
+    list_display = ('name', 'address', 'latitude', 'longitude', 'tg_group_id', 'is_active')
     search_fields = ('name', 'shop_id', 'cashbox_id')
     list_filter = ('is_active',)
     ordering = ('name',)
-    list_editable = ('is_active', 'latitude', 'longitude', 'address')
+    list_editable = ('is_active', 'latitude', 'longitude', 'address', 'tg_group_id')
 
     def get_urls(self):
         urls = super().get_urls()
