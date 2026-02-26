@@ -10,6 +10,7 @@ class Shop(models.Model):
     # location coordinates
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Широта")
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Долгота")
+    address = models.CharField(null=True, blank=True, max_length=255, verbose_name="Адрес")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
 
     def __str__(self):
