@@ -8,8 +8,8 @@ class Shop(models.Model):
     shop_id = models.CharField(max_length=128, unique=True, verbose_name="ID Магазина Billz")
     cashbox_id = models.CharField(max_length=128, unique=True, verbose_name="ID Кассы Billz")
     # location coordinates
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Широта")
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, verbose_name="Долгота")
+    latitude = models.FloatField(null=True, blank=True, verbose_name="Широта")
+    longitude = models.FloatField(null=True, blank=True, verbose_name="Долгота")
     address = models.CharField(null=True, blank=True, max_length=255, verbose_name="Адрес")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     tg_group_id = models.CharField(null=True, blank=True, max_length=32, verbose_name="ID группы Telegram")
