@@ -31,6 +31,7 @@ def create_claim(order_id: int):
                 "pickup_point": 1,
                 "quantity": item.quantity,
                 "title": item.product.name,
+                "extra_id": order.billz_id,
                 "dropoff_point": 2
             } for item in order.items.all()
         ],
@@ -41,8 +42,8 @@ def create_claim(order_id: int):
                     "coordinates": [shop.longitude, shop.latitude]
                 },
                 "contact": {
-                    "name": "Kunleek online store",
-                    "phone": "+998900444777"
+                    "name": "Магазин Kunleek",
+                    "phone": shop.phone
                 },
                 "point_id": 1,
                 "type": "source",
@@ -72,6 +73,11 @@ def create_claim(order_id: int):
         "client_requirements": {
             "taxi_class": "express"
 
+        },
+        "comment": f"Заказ №{order.billz_id or order.id}\n",
+        "emergency_contact": {
+            "name": "Buyurtmachi/Заказчик",
+            "phone": shop.phone
         }
     }
 

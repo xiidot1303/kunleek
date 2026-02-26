@@ -11,6 +11,7 @@ class Shop(models.Model):
     latitude = models.FloatField(null=True, blank=True, verbose_name="Широта")
     longitude = models.FloatField(null=True, blank=True, verbose_name="Долгота")
     address = models.CharField(null=True, blank=True, max_length=255, verbose_name="Адрес")
+    phone = models.CharField(null=True, blank=True, max_length=255, verbose_name="Телефон")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     tg_group_id = models.CharField(null=True, blank=True, max_length=32, verbose_name="ID группы Telegram")
 
