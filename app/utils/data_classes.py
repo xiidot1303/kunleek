@@ -16,7 +16,7 @@ class OrderStatus:
         return True if 'error' in status else False
 
 class YandexTripStatus:
-    READY_FOR_APPROVAL = 'performer_found'
+    READY_FOR_APPROVAL = 'ready_for_approval'
     PERFORMER_FOUND = 'performer_found'
     PICKUP_ARRIVED = 'pickup_arrived'
     DELIVERY_ARRIVED = 'delivery_arrived'
