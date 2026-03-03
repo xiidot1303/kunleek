@@ -201,9 +201,9 @@ class Strings:
         "<b>Ошибка при отмене оплаты заказа #{order_id}, пожалуйста, свяжитесь с оператором</b>"
     ]
 
-    _ = [
-        "",
-        ""
+    language_successfully_changed = [
+        "Bot tili muvaffaqiyatli o'zgartirildi",
+        "Язык бота успешно изменен"
     ]
 
     _ = [

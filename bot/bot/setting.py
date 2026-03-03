@@ -10,9 +10,13 @@ async def switch_language(update: Update, context: CustomContext):
     await bot_user.asave()
     # Change the user's language
     # send message
+    await query.answer(context.words.language_successfully_changed)
     reply_markup = await switch_languages_inline_keyboard(context)
-    await query.edit_message_text(
-        text=context.words.select_language,
-        parse_mode=ParseMode.HTML,
-        reply_markup=reply_markup
-    )
+    try:
+        await query.edit_message_text(
+            text=context.words.select_language,
+            parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup
+        )
+    except Exception as e:
+        pass
