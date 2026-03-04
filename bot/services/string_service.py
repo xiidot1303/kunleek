@@ -27,7 +27,7 @@ def perfomer_arrived_pickup_string(yandex_trip: YandexTrip):
         car_color=yandex_trip.car_color,
         car_model=yandex_trip.car_model,
         car_number=yandex_trip.car_number,
-        order_id=yandex_trip.order.id
+        order_id=yandex_trip.order.billz_id or yandex_trip.order.id
     )
     return text
 
