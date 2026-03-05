@@ -64,7 +64,7 @@ def payment_submit_ofd(account: Account) -> dict:
             "Name": item.get("product__name"),
             "SPIC": item.get("product__mxik"),
             "PackageCode": item.get("product__package_code"),
-            "Price": int(int(item.get("price")) / 1.12 * item.get("quantity") * 100),
+            "Price": int(int(item.get("price")) * item.get("quantity") * 100),
             "Amount": item.get("quantity"),
             "VAT": int(0.12 * int(item.get("price"))/1.12 * 100),
             "VATPercent": 12,
@@ -81,7 +81,7 @@ def payment_submit_ofd(account: Account) -> dict:
                 "Name": "Delivery",
                 "SPIC": "10107002001000000",
                 "PackageCode": "1209885",
-                "Price": int(float(account.delivery_price) / 1.12 * 100),
+                "Price": int(float(account.delivery_price) * 100),
                 "Amount": 1,
                 "VAT": int(0.12 * float(account.delivery_price)/1.12 * 100),
                 "VATPercent": 12,
@@ -95,7 +95,7 @@ def payment_submit_ofd(account: Account) -> dict:
         "service_id": CLICK_SERVICE_ID,
         "payment_id": click_trans.click_paydoc_id,
         "items": fiscal_items,
-        "received_card": click_trans.amount
+        "received_card": click_trans.amount * 100
     }
 
     request = ClickEndpointRequest(
