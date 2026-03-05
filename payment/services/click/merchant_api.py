@@ -1,5 +1,4 @@
 from config import CLICK_SERVICE_ID
-from payment.services import *
 from payment.services.click import *
 from payment.models import Click_transaction
 
@@ -34,12 +33,13 @@ def payment_cancel(click_paydoc_id: int) -> dict:
     return response
 
 
-def payment_submit_ofd(account: Account) -> dict:
+def payment_submit_ofd(click_trans: Click_transaction, items: list) -> dict:
     """
     Submits a payment for off-line processing.
 
     Args:
-        Account (obj): Account obj.
+        click_trans (obj): Click_transaction obj.
+        items (list): Order Items list
 
     Returns:
         dict: {
@@ -56,9 +56,7 @@ def payment_submit_ofd(account: Account) -> dict:
         }
     """
     url = f"{CLICK_API_ENDPOINT}/payment/ofd_data/submit_items"
-    click_trans: Click_transaction = Click_transaction.objects.get(
-        order_id=account.id)
-    items = get_items_by_account_id(account.id)
+    account = click_trans.order
     fiscal_items = [
         {
             "Name": item.get("product__name"),

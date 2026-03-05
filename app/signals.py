@@ -18,7 +18,7 @@ from config import DEBUG
 from app.utils.data_classes import OrderStatus, YandexTripStatus
 from celery.signals import task_failure
 from app.services.error_handler import run_on_error
-from payment.services import cancel_order_payment
+from payment.services import cancel_order_payment, fiscalize_payment
 from asgiref.sync import async_to_sync
 
 
@@ -83,6 +83,11 @@ def handle_order_status_change(sender, instance: Order, update_fields, **kwargs)
             else:
                 instance.status = OrderStatus.WAITING_DELIVERY_WORKING_HOURS
                 instance.save(update_fields=["status"])
+        
+        # fiscalize Click payment
+        transaction.on_commit(
+            lambda: fiscalize_payment.delay(instance.id)
+        )
 
     elif instance.status == OrderStatus.DELIVERED and "status" in update_fields:
         # ask review from bot user

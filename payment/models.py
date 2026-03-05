@@ -37,3 +37,4 @@ class Click_transaction(models.Model):
     amount = models.BigIntegerField(null=True, blank=False)
     status = models.CharField(null=True, blank=True, max_length=50)
     sign_time = models.CharField(null=True, blank=True, max_length=50)
+    fiscalized = models.BooleanField(null=True, default=False)

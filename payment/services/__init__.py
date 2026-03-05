@@ -11,8 +11,9 @@ from payment.services.payme.subscribe_api import (
     receipts_cancel_api as cancel_payme_payment
     )
 from payment.services.click import get_click_invoice_url
-from payment.services.click.merchant_api import payment_cancel
+from payment.services.click.merchant_api import payment_cancel, payment_submit_ofd
 from asgiref.sync import sync_to_async
+from celery import shared_task
 
 
 async def get_invoice_url(payment_id, amount, payment_system):
@@ -54,3 +55,18 @@ async def cancel_order_payment(order: Account) -> str:
             payment.status = "canceled"
             await payment.asave(update_fields=["status"])
         return "success" if code == 0 else "error"
+    
+
+@shared_task
+def fiscalize_payment(account_id: int):
+    account: Account = Account.objects.get(id=account_id)
+    payment: Click_transaction = Click_transaction.objects.get(order_id=account.id)
+    items = get_items_by_account_id(account.id)
+    response = payment_submit_ofd(
+        click_trans=payment,
+        items=items
+    )
+    code = response.get("error_code", -1)
+    if code == 0:
+        payment.fiscalized = True
+        payment.save()
