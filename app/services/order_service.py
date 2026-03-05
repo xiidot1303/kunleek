@@ -57,7 +57,6 @@ async def order_pay(order: Order, payment_system):
     await order.asave(update_fields=['payed', 'payment_system'])
 
 
-@sync_to_async
 def get_order_items_list_by_order_id(order_id: int | str) -> list | None:
     items = list(OrderItem.objects.filter(order_id=order_id).values(
         'id', 'order_id', 'product_id', 'product__name', 'product__mxik', 'product__package_code', 'quantity', 'price'

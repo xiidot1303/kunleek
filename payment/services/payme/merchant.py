@@ -13,7 +13,7 @@ async def CheckPerformTransaction(amount, account_id, test):
         if int(amount) / 100 != int(account.total):
             return None, Errors.INCORRECT_AMOUNT
         account: Account
-        items = await get_items_by_account_id(account.id)
+        items = await sync_to_async(get_items_by_account_id)(account.id)
         return await Results.CHECKPERFORM_TRANSACTION(account, items, test), None
     else:
         return None, Errors.ACCOUNT_NOT_FOUND
