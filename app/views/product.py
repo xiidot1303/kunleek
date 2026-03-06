@@ -5,13 +5,21 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from app.swagger_schemas import *
 from bot.models import Bot_user
-from django.db.models import Min, Max, F
+from django.db.models import Min, Max, F, QuerySet
 from app.services.product_service import filter_products_for_serializer
+from rest_framework.pagination import PageNumberPagination
+
+
+class ProductsPagination(PageNumberPagination):
+    page_size = 50
+    page_size_query_param = "page_size"
+    max_page_size = 50
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.filter(active=True)
     serializer_class = ProductSerializer
+    pagination_class = ProductsPagination
 
 
     def get_queryset(self):
@@ -20,6 +28,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         shop_id = self.request.query_params.get('shop_id')
 
         return filter_products_for_serializer(queryset, user_id, shop_id)
+
+    def paginate_queryset(self, queryset):
+        """
+        Enable pagination ONLY when parameter `page` is provided
+        """
+        if self.request.query_params.get("page"):
+            return super().paginate_queryset(queryset)
+
+        return None 
 
     @swagger_auto_schema(
         method='get',
@@ -45,7 +62,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         """
         Get discounted products
         """
-        products = self.get_queryset().filter(price__lt=F('price_without_discount'))
+        products: QuerySet[Product] = self.get_queryset().filter(
+            price__lt=F('price_without_discount')).order_by('category')
+        page = self.paginate_queryset(products)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        products = products.exclude(quantity = 0)[:30]
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
