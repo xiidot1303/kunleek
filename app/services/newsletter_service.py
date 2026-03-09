@@ -145,7 +145,7 @@ def notify_admin_order_delivered(yandex_trip_id):
     yandex_trip: YandexTrip = YandexTrip.objects.get(pk=yandex_trip_id)
     order: Order = yandex_trip.order
     text = Strings.order_delivered[0].format(
-        order_id = order.id
+        order_id = order.billz_id or order.id
     )
     send_newsletter_api(
         bot_user_id=order.shop.tg_group_id,
