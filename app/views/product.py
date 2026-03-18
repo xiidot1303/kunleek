@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from app.swagger_schemas import *
 from bot.models import Bot_user
 from django.db.models import Min, Max, F, QuerySet
-from app.services.product_service import filter_products_for_serializer
+from app.services.product_service import filter_products_for_serializer, search_products_by_name
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -40,7 +40,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method='get',
-        manual_parameters=[product_by_name_param, shop_id_param, user_id_param],
+        manual_parameters=[product_by_name_param, shop_id_param, user_id_param, lang_param],
         responses={200: openapi.Response('Products found by name', ProductSerializer(many=True))}
     )
     @action(detail=False, methods=['get'], url_path='by-name')
@@ -49,10 +49,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         Get products by name.
         """
         name = request.query_params.get('name')
+        lang = request.query_params.get('lang')
         if not name:
             return Response({"error": "Name parameter is required"}, status=400)
-
-        products = self.get_queryset().filter(name__icontains=name)
+        name_field = f"name_normalized_{lang}"
+        products = search_products_by_name(self.get_queryset(), name, name_field)[:50]
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 

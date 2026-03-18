@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from app.utils.data_classes import *
+from app.utils import transliterate
     
 
 class Shop(models.Model):
@@ -82,6 +83,8 @@ class Product(models.Model):
     name = models.CharField(max_length=1024, verbose_name="Название")
     name_uz = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на узбекском")
     name_ru = models.CharField(max_length=1024, blank=True, null=True, verbose_name="Название на русском")
+    name_normalized_uz = models.CharField(max_length=1024, blank=True, null=True)
+    name_normalized_ru = models.CharField(max_length=1024, blank=True, null=True)
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
     photo = models.URLField(null=True, blank=True, verbose_name="URL фото")
     photos = models.JSONField(
@@ -100,6 +103,11 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
+    def save(self, *args, **kwargs):
+        self.name_normalized_uz = transliterate(self.name_uz) if self.name_uz else self.name_normalized_uz
+        self.name_normalized_ru = transliterate(self.name_ru) if self.name_ru else self.name_normalized_ru
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"

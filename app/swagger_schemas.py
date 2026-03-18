@@ -32,3 +32,11 @@ user_id_param = openapi.Parameter(
     type=openapi.TYPE_STRING,
     required=False
 )
+
+lang_param = openapi.Parameter(
+    'lang',
+    openapi.IN_QUERY,
+    description='User language',
+    type=openapi.TYPE_STRING,
+    required=True
+)

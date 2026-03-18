@@ -1,7 +1,10 @@
 from app.models import Product, Category, Shop, ProductByShop, FavoriteProduct
 from config import BILLZ_SHOP_ID as shop_id, BILLZ_CATEGORY4_ID as category_custom_field_id
 from decimal import Decimal
-from django.db.models import OuterRef, Subquery, Exists, QuerySet
+from django.db.models import OuterRef, Subquery, Exists, QuerySet, Case, When, IntegerField
+from django.contrib.postgres.search import TrigramSimilarity
+from typing import List
+from app.utils import transliterate
 
 
 def create_product_from_billz(product_data):
@@ -48,6 +51,8 @@ def create_product_from_billz(product_data):
             product_obj = Product(
                 billz_id=billz_id,
                 name=name,
+                name_normalized_uz=transliterate(name),
+                name_normalized_ru=transliterate(name),
                 category=category,
                 description=description,
                 photo=main_photo,
@@ -151,3 +156,14 @@ def filter_products_for_serializer(
         quantity=Subquery(products_by_shop.values('quantity')[:1]),
     ).order_by('price')
     return products
+
+
+def search_products_by_name(queryset: QuerySet[Product], name: str, name_field: str, limit: int = 50) -> QuerySet[Product]:
+    name_norm = transliterate(name)
+
+    return (
+        queryset
+        .annotate(similarity=TrigramSimilarity(name_field, name_norm))
+        .filter(similarity__gt=0.1)
+        .order_by('-similarity')
+    )
