@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.filter(active=True).select_related('parent_category')
     serializer_class = CategorySerializer
 
     def list(self, request, *args, **kwargs):

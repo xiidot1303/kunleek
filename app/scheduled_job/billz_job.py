@@ -38,6 +38,9 @@ def fetch_products():
             break
         
         page += 1
+    
+    # Deactivate empty categories
+    deactivate_categories_if_empty()
     # Deactivate products not in Billz
     # delete_products_not_in_billz(all_billz_ids)
 

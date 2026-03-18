@@ -38,6 +38,7 @@ class Category(models.Model):
     )
     photo = models.FileField(null=True, blank=True, upload_to='category/photos/', verbose_name="Фото")
     index = models.IntegerField(default=0, help_text="Порядок категории в списке")
+    active = models.BooleanField(default=True, verbose_name="Активна")
 
     def __str__(self):
         return self.name

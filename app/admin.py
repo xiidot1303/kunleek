@@ -53,14 +53,25 @@ class ShopAdmin(admin.ModelAdmin):
         return custom_urls + urls
         
 
+class SubCategoryTabular(admin.TabularInline):
+    model = Category
+    extra = 1
+
+
+class ProductTabular(admin.TabularInline):
+    model = Product
+    extra = 1
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'name_uz', 'name_ru',
-                    'index', 'parent_category', 'photo')
+                    'index', 'parent_category', 'active', 'photo')
     search_fields = ('name', 'billz_id')
     list_filter = ('parent_category',)
     ordering = ('index',)
     list_editable = ('index', 'name_uz', 'name_ru',)
+    inlines = [SubCategoryTabular, ProductTabular]
 
     def get_urls(self):
         urls = super().get_urls()
