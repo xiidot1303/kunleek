@@ -221,7 +221,7 @@ class BillzService:
             "comment": "Telegram bot order",
             "with_cashback": int(with_cashback),
             "without_cashback": False,
-            "skip_ofd": False
+            "skip_ofd": False if payment_method == "cash" else True
         }
 
         response_data = self.send_request(url, data=data, http_method="POST")
