@@ -218,7 +218,7 @@ class BillzService:
                     "returned_amount": 0
                 },
             ],
-            "comment": "Telegra bot order",
+            "comment": "Telegram bot order",
             "with_cashback": int(with_cashback),
             "without_cashback": False,
             "skip_ofd": False
