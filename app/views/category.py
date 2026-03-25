@@ -1,7 +1,9 @@
 from rest_framework import viewsets
-from app.models import Category
-from app.serializers import CategorySerializer
+from app.models import Category, DiscountCategory
+from app.serializers import CategorySerializer, DiscountCategorySerializer
 from rest_framework.response import Response
+from app.swagger_schemas import *
+from app.services.product_service import search_products_by_name, Product
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -30,3 +32,30 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(top_level, many=True)
         return Response(serializer.data)
+
+
+class DiscountCategoryViewSet(viewsets.ModelViewSet):
+    queryset = DiscountCategory.objects.all().order_by('index')
+    serializer_class = DiscountCategorySerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        product_name = self.request.query_params.get('name', None)
+        lang = self.request.query_params.get('lang')
+        if product_name:
+            products = Product.objects.filter(active=True)
+            filtered_products = search_products_by_name(
+                queryset=products,
+                name=product_name,
+                name_field=f"name_normalized_{lang}"
+            )
+            matching_products_ids = filtered_products.values_list('discount_category', flat=True)
+            queryset = queryset.filter(id__in=matching_products_ids)
+        return queryset
+
+    @swagger_auto_schema(
+        manual_parameters=[product_by_name_param, lang_param],
+        responses={200: DiscountCategorySerializer(many=True)}
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs) 

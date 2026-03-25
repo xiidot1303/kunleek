@@ -22,7 +22,8 @@ shop_id_param = openapi.Parameter(
     'shop_id',
     openapi.IN_QUERY,
     description='Shop ID',
-    type=openapi.TYPE_INTEGER
+    type=openapi.TYPE_INTEGER,
+    required=True
 )
 
 user_id_param = openapi.Parameter(
@@ -39,4 +40,12 @@ lang_param = openapi.Parameter(
     description='User language',
     type=openapi.TYPE_STRING,
     required=True
+)
+
+discount_category_id_param = openapi.Parameter(
+    'category_id',
+    openapi.IN_QUERY,
+    description='Discount Category ID',
+    type=openapi.TYPE_INTEGER,
+    required=False
 )

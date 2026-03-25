@@ -11,13 +11,13 @@ from rest_framework.pagination import PageNumberPagination
 
 
 class ProductsPagination(PageNumberPagination):
-    page_size = 50
+    page_size = 20
     page_size_query_param = "page_size"
     max_page_size = 50
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.filter(active=True)
+    queryset = Product.objects.filter(active=True).select_related('category', 'discount_category')
     serializer_class = ProductSerializer
     pagination_class = ProductsPagination
 
@@ -57,14 +57,25 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
-    @swagger_auto_schema(manual_parameters=[shop_id_param, user_id_param])
+    @swagger_auto_schema(manual_parameters=[
+        shop_id_param, user_id_param, discount_category_id_param, product_by_name_param, lang_param
+        ])
     @action(detail=False, methods=['get'], url_path='discounted')
     def discounted(self, request):
         """
         Get discounted products
         """
+        category_id = request.query_params.get('category_id', None)
+        name = request.query_params.get('name', None)
+        lang = request.query_params.get('lang')
+        
         products: QuerySet[Product] = self.get_queryset().filter(
             price__lt=F('price_without_discount')).order_by('category')
+        if category_id:
+            products = products.filter(discount_category_id=category_id)
+        if name:
+            name_field = f"name_normalized_{lang}"
+            products = search_products_by_name(products, name, name_field)
         page = self.paginate_queryset(products)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

@@ -160,10 +160,11 @@ def filter_products_for_serializer(
 
 def search_products_by_name(queryset: QuerySet[Product], name: str, name_field: str, limit: int = 50) -> QuerySet[Product]:
     name_norm = transliterate(name)
-
-    return (
+    
+    result = (
         queryset
         .annotate(similarity=TrigramSimilarity(name_field, name_norm))
         .filter(similarity__gt=0.1)
         .order_by('-similarity')
     )
+    return result

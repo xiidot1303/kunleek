@@ -9,6 +9,7 @@ from django.contrib.auth.views import (
 from app.views import main
 from app.views.product import ProductViewSet
 from app.views.category import CategoryViewSet
+from app.views.category import DiscountCategoryViewSet
 from app.views.delivery import DeliveryTypeViewSet
 from app.views.banner import BannerViewSet
 from app.views.shop import ShopViewSet
@@ -22,6 +23,7 @@ from app.views.order_review import OrderReviewViewSet
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'discount-categories', DiscountCategoryViewSet, basename='discountcategory')
 router.register(r'shops', ShopViewSet, basename='shop')
 router.register(r'delivery-types', DeliveryTypeViewSet, basename='delivery-type')
 router.register(r'banners', BannerViewSet, basename='banner')
