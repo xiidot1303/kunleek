@@ -206,14 +206,14 @@ class Strings:
         "Язык бота успешно изменен"
     ]
 
-    _ = [
-        "",
-        ""
+    promocode_already_used = [
+        "Siz ushbu promokoddan avval foydalangansiz.",
+        "Вы уже использовали этот промокод"
     ]
 
-    _ = [
-        "",
-        ""
+    invalid_promocode = [
+        "Promokod noto'g'ri yoki muddati o'tgan.",
+        "Неверный или истекший срок действия промокода."
     ]
 
     _ = [

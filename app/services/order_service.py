@@ -27,8 +27,10 @@ def send_order_to_billz(order_id):
             )
 
         billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
+        payed_amount = order.subtotal - order.bonus_used - order.discount_amount
+        billz_service.make_discount(amount=payed_amount)
         billz_service.complete_order(
-            paid_amount=order.subtotal - order.bonus_used, 
+            paid_amount=payed_amount, 
             payment_method=order.payment_method,
             with_cashback=order.bonus_used
             )

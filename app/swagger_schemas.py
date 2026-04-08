@@ -49,3 +49,11 @@ discount_category_id_param = openapi.Parameter(
     type=openapi.TYPE_INTEGER,
     required=False
 )
+
+promocode_param = openapi.Parameter(
+    'code',
+    openapi.IN_QUERY,
+    description='Promo code to validate',
+    type=openapi.TYPE_STRING,
+    required=True
+)

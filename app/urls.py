@@ -18,6 +18,7 @@ from app.views.favorite_product import FavoriteProductViewSet
 from app.views.client import BotUserViewSet
 from app.views.yandex_delivery import YandexDeliveryView, CheckPrice
 from app.views.order_review import OrderReviewViewSet
+from app.views.promocode import PromoCodeViewSet
 
 
 router = DefaultRouter()
@@ -32,6 +33,7 @@ router.register(r'order-items', OrderItemViewSet, basename='orderitem')
 router.register(r'favorite-products', FavoriteProductViewSet, basename='favoriteproduct')
 router.register(r'bot-users', BotUserViewSet, basename='botuser')
 router.register(r'order-reviews', OrderReviewViewSet, basename='orderreview')
+router.register(r'promocodes', PromoCodeViewSet, basename='promocode')
 
 
 # Swagger imports

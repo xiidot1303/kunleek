@@ -37,6 +37,8 @@ def send_order_info_to_group(order_id: int):
         f"📦 Состав заказа:\n{items_text}\n\n"
         f"💬 Комментарии: {order.notes}\n\n"
         f"💵 Сумма заказа: {order.subtotal} сум\n"
+        f"🈹 Сумма скидки: {order.discount_amount} сум\n"
+        f"#️⃣ Промокод: {order.promocode.code if order.promocode else ""}\n"
         f"🚚 Доставка: {order.delivery_price} сум\n"
         f"💰 Общая сумма: {order.total} сум\n\n"
         f"📅 Дата заказа: {order.created_at.strftime('%Y-%m-%d %H:%M:%S')}\n\n"

@@ -148,3 +148,9 @@ class OrderReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderReview
         fields = '__all__'
+
+
+class PromoCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PromoCode
+        fields = ['id', 'code', 'discount_percent', 'discount_amount', 'min_order_amount']

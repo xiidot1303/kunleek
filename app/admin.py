@@ -398,3 +398,11 @@ class OrderReviewAdmin(admin.ModelAdmin):
     list_display = ('order', 'rating', 'comment')
     search_fields = ('order__id', 'comment')
     list_filter = ('rating',)
+
+
+@admin.register(PromoCode)
+class PromoCodeAdmin(admin.ModelAdmin):
+    list_display = ('code', 'discount_percent', 'discount_amount', 'valid_from', 'valid_to', 'usage_limit', 'used_count')
+    search_fields = ('code',)
+    list_filter = ('valid_from', 'valid_to')
+    ordering = ('-valid_from',)

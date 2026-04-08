@@ -236,8 +236,10 @@ class Order(models.Model):
         (PaymentMethod.PAYME, 'Payme'),
         (PaymentMethod.CLICK, 'Click')
     ]
+    promocode = models.ForeignKey("app.PromoCode", null=True, blank=True, on_delete=models.SET_NULL, verbose_name="Промокод")
     payment_method = models.CharField(max_length=50, verbose_name="Метод оплаты", choices=PAYMENT_METHOD_CHOICES)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма")
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Сумма скидки")
     delivery_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена доставки")
     bonus_used = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Использованные бонусы")
     total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Итоговая сумма")
@@ -316,3 +318,33 @@ class YandexTrip(models.Model):
 
     def __str__(self):
         return f"Yandex Trip for Order {self.order.id}"
+
+
+class PromoCode(models.Model):
+    code = models.CharField(max_length=50, unique=True, verbose_name="Промокод")
+    discount_percent = models.PositiveIntegerField(null=True, blank=True, verbose_name="Процент скидки")
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, verbose_name="Сумма скидки")
+    active = models.BooleanField(default=True, verbose_name="Активен")
+    valid_from = models.DateTimeField(default=timezone.now, verbose_name="Действует с")
+    valid_to = models.DateTimeField(verbose_name="Действует до")
+    usage_limit = models.PositiveIntegerField(null=True, blank=True, verbose_name="Лимит использования")
+    used_count = models.PositiveIntegerField(default=0, verbose_name="Количество использований")
+    min_order_amount = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True, verbose_name="Минимальная сумма заказа")
+    used_by = models.ManyToManyField('bot.Bot_user', related_name='used_promocodes', blank=True, verbose_name="Пользователи, использовавшие промокод")
+
+    def is_valid(self):
+        now = timezone.now()
+        if not self.active:
+            return False
+        if self.valid_from > now or self.valid_to < now:
+            return False
+        if self.usage_limit and self.used_count >= self.usage_limit:
+            return False
+        return True
+
+    def __str__(self):
+        return self.code
+    
+    class Meta:
+        verbose_name = "Промокод"
+        verbose_name_plural = "Промокоды"
