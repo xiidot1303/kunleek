@@ -68,6 +68,9 @@ def handle_order_status_change(sender, instance: Order, update_fields, **kwargs)
         transaction.on_commit(
             lambda: send_order_info_to_group.delay(instance.id)
         )
+        # if promocode exist for order, add bot user to promocode users
+        if instance.promocode:
+            instance.promocode.used_by.add(instance.bot_user)
     
     elif (
             instance.status == OrderStatus.READY_TO_APPROVAL
