@@ -117,7 +117,8 @@ class Product(models.Model):
 class ProductByShop(models.Model):
     shop = models.ForeignKey('Shop', on_delete=models.CASCADE, related_name='products', verbose_name="Магазин")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='shops', verbose_name="Продукт")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена Bot")
+    original_price = models.DecimalField(null=True, max_digits=10, decimal_places=2, verbose_name="Цена Billz")
     price_without_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Цена без скидки")
     quantity = models.PositiveIntegerField(default=0, verbose_name="Количество")
 

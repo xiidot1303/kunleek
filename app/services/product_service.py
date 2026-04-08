@@ -116,7 +116,8 @@ def create_product_from_billz(product_data):
             key = (shop_billz_id, billz_id)
             existing_pb = existing_pbs_map.get(key)
             if existing_pb:
-                existing_pb.price = price
+                existing_pb.price = price if existing_pb.price == existing_pb.original_price else existing_pb.price
+                existing_pb.original_price = price
                 existing_pb.price_without_discount = price_without_discount
                 existing_pb.quantity = quantity
                 pbs_to_update.append(existing_pb)
@@ -125,6 +126,7 @@ def create_product_from_billz(product_data):
                     shop=shop_obj,
                     product=product_obj,
                     price=price,
+                    original_price=price,
                     price_without_discount=price_without_discount,
                     quantity=quantity,
                 )
