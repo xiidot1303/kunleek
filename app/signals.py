@@ -71,6 +71,8 @@ def handle_order_status_change(sender, instance: Order, update_fields, **kwargs)
         # if promocode exist for order, add bot user to promocode users
         if instance.promocode:
             instance.promocode.used_by.add(instance.bot_user)
+            instance.promocode.used_count += 1
+            instance.promocode.save(update_fields=["used_by", "used_count"])
     
     elif (
             instance.status == OrderStatus.READY_TO_APPROVAL
