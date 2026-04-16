@@ -166,6 +166,7 @@ class BillzService:
         }
         if free_price:
             data["free_price"] = int(free_price)
+            data["use_free_price"] = True
         try:
             response_data = self.send_request(url, data=data, http_method="POST")
         except BillzAPIError as e:
