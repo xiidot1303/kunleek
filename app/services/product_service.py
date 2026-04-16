@@ -136,7 +136,11 @@ def create_product_from_billz(product_data):
     if new_pbs:
         ProductByShop.objects.bulk_create(new_pbs, batch_size=500)
     if pbs_to_update:
-        ProductByShop.objects.bulk_update(pbs_to_update, ['price', 'price_without_discount', 'quantity'], batch_size=500)
+        ProductByShop.objects.bulk_update(
+            pbs_to_update, 
+            ['price', 'price_without_discount', 'quantity', 'original_price'], 
+            batch_size=500
+        )
 
     return billz_ids
 
