@@ -155,7 +155,7 @@ class BillzService:
         self.order_number = order_number
         return response_data
 
-    def add_product_to_order(self, product_id, quantity, is_manual=False, free_price=None):
+    def add_product_to_order(self, product_id, quantity, is_manual=False, free_price: int | None=None):
         url = f"{self.url}v2/order-product/{self.order_id}"
         data = {
             "sold_measurement_value": quantity,
@@ -165,8 +165,9 @@ class BillzService:
             "response_type": "HTTP"
         }
         if free_price:
-            data["free_price"] = int(free_price)
+            data["free_price"] = free_price
             data["use_free_price"] = True
+            
         try:
             response_data = self.send_request(url, data=data, http_method="POST")
         except BillzAPIError as e:

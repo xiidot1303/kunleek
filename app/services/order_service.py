@@ -35,7 +35,7 @@ def send_order_to_billz(order_id):
                 product_id=item.product.billz_id,
                 quantity=item.quantity,
                 is_manual=is_manual,
-                free_price=free_price
+                free_price=int(free_price)
             )
 
         billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
