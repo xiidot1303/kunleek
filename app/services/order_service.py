@@ -1,4 +1,4 @@
-from app.models import Order, Product, OrderItem
+from app.models import Order, Product, OrderItem, ProductByShop
 from celery import shared_task
 from app.services.billz_service import BillzService, APIMethods
 from asgiref.sync import sync_to_async
@@ -21,14 +21,27 @@ def send_order_to_billz(order_id):
         # add products to the order
         for item in items:
             item: OrderItem
+            product_by_shop = ProductByShop.objects.get(product=item.product, shop=order.shop)
+            bot_price = product_by_shop.price
+            billz_price = product_by_shop.original_price
+            if bot_price != billz_price:
+                is_manual = True
+                free_price = bot_price
+            else:
+                is_manual = False
+                free_price = None
+                
             billz_service.add_product_to_order(
                 product_id=item.product.billz_id,
-                quantity=item.quantity
+                quantity=item.quantity,
+                is_manual=is_manual,
+                free_price=free_price
             )
 
         billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
         payed_amount = order.subtotal - order.bonus_used - order.discount_amount
-        billz_service.make_discount(amount=payed_amount)
+        if order.discount_amount:
+            billz_service.make_discount(amount=payed_amount)
         billz_service.complete_order(
             paid_amount=payed_amount, 
             payment_method=order.payment_method,
