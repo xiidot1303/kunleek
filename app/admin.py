@@ -31,7 +31,7 @@ def fetch_categories_manually(request):
 
 def fetch_products_manually(request):
     from app.scheduled_job.billz_job import fetch_products
-    fetch_products()
+    fetch_products.delay()
     messages.success(request, "Продукты успешно обновлены!")
     return redirect("../")
 

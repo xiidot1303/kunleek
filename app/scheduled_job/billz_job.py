@@ -6,6 +6,8 @@ from app.services.product_service import *
 from app.services.client_service import *
 from app.services.shop_service import *
 from app.services.billz_service import BillzService, APIMethods
+from celery import shared_task
+
 
 def fetch_and_cache_access_token():
     url = "https://api-admin.billz.ai/v1/auth/login"
@@ -25,6 +27,7 @@ def fetch_categories():
     create_category_from_billz(categories)
 
 
+@shared_task
 def fetch_products():
     billz_service = BillzService(method=APIMethods.products)
     page = 1
