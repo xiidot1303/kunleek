@@ -98,6 +98,7 @@ class Product(models.Model):
     package_code = models.CharField(max_length=100, null=True, blank=True, verbose_name="Код упаковки")
     is_pack = models.BooleanField(default=False, verbose_name="Пакет?")
     active = models.BooleanField(null=True, default=False)
+    last_sync = models.DateTimeField(auto_now=True, verbose_name="Дата последней синхронизации")
     
     
     def __str__(self):

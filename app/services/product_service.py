@@ -5,6 +5,7 @@ from django.db.models import OuterRef, Subquery, Exists, QuerySet, Case, When, I
 from django.contrib.postgres.search import TrigramSimilarity
 from typing import List
 from app.utils import transliterate
+from django.utils import timezone
 
 
 def create_product_from_billz(product_data):
@@ -46,6 +47,7 @@ def create_product_from_billz(product_data):
             product_obj.photo = main_photo
             product_obj.photos = photos
             product_obj.sku = sku
+            product_obj.last_sync = timezone.now()
             products_to_update.append(product_obj)
         else:
             product_obj = Product(
@@ -58,6 +60,7 @@ def create_product_from_billz(product_data):
                 photo=main_photo,
                 photos=photos,
                 sku=sku,
+                last_sync=timezone.now()
             )
             new_products.append(product_obj)
 
@@ -69,7 +72,7 @@ def create_product_from_billz(product_data):
     if products_to_update:
         Product.objects.bulk_update(
             products_to_update,
-            ['name', 'category', 'description', 'photo', 'photos', 'sku'],
+            ['name', 'category', 'description', 'photo', 'photos', 'sku', 'last_sync'],
             batch_size=500
         )
 

@@ -119,7 +119,7 @@ class ProductByShopInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'discount_category', 'name_uz',
-                    'name_ru', 'mxik', 'package_code', 'active')
+                    'name_ru', 'mxik', 'package_code', 'last_sync', 'active')
     search_fields = ('name', 'sku')
     list_filter = ('category', 'active')
     ordering = ('name',)
