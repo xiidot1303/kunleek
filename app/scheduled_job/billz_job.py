@@ -48,6 +48,25 @@ def fetch_products():
     # delete_products_not_in_billz(all_billz_ids)
 
 
+@shared_task
+def fetch_products_last_updated():
+    billz_service = BillzService(method=APIMethods.products)
+    page = 1
+    all_billz_ids = []
+    while True:
+        products = billz_service.fetch_products(page=page, last_updated_before=10)
+        if products:=products:
+            billz_ids = create_product_from_billz(products)
+            all_billz_ids.extend(billz_ids)
+        else:
+            break
+        
+        page += 1
+    
+
+    deactivate_categories_if_empty()
+
+
 def fetch_shops():
     billz_service = BillzService(method=APIMethods.shops)
     shops = billz_service.fetch_shops()

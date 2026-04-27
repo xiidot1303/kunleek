@@ -1,4 +1,4 @@
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import requests
 import json
 import aiohttp
@@ -132,3 +132,8 @@ CYRILLIC_TO_LATIN = {
 
 def transliterate(text: str) -> str:
     return ''.join(CYRILLIC_TO_LATIN.get(c, c) for c in text.lower())
+
+
+def datetime_now_utc():
+    now = datetime.now(timezone.utc)
+    return now

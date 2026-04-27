@@ -18,6 +18,7 @@ class jobs:
     scheduler.add_job(save_langs_to_redis, 'interval', minutes=20)
 
     # scheduler.add_job(billz_job.fetch_categories, 'interval', minutes=120)
-    scheduler.add_job(billz_job.fetch_products, 'interval', minutes=2)
+    scheduler.add_job(billz_job.fetch_products, 'cron', hour=0, minute=0)
+    scheduler.add_job(billz_job.fetch_products_last_updated, 'interval', minutes=1)
     # scheduler.add_job(billz_job.fetch_shops, 'interval', minutes=20)
     scheduler.add_job(order_job.create_claims_if_delivery_open, 'interval', minutes=10)

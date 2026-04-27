@@ -36,6 +36,13 @@ def fetch_products_manually(request):
     return redirect("../")
 
 
+def fetch_products_last_updated_manually(request):
+    from app.scheduled_job.billz_job import fetch_products_last_updated
+    fetch_products_last_updated()
+    messages.success(request, "Продукты успешно обновлены!")
+    return redirect("../")
+
+
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'phone', 'latitude', 'longitude', 'tg_group_id', 'is_active')
@@ -132,6 +139,8 @@ class ProductAdmin(admin.ModelAdmin):
         custom_urls = [
             path("fetch-products-manually/", self.admin_site.admin_view(fetch_products_manually),
                  name="fetch_products_manually"),
+            path("fetch-products-last-updated-manually/", self.admin_site.admin_view(fetch_products_last_updated_manually),
+                 name="fetch_products_last_updated_manually"),
             path(
                 "upload-sku-excel/",
                 self.admin_site.admin_view(self.upload_sku_excel),

@@ -3,6 +3,7 @@ import requests
 from django.core.cache import cache
 from app.services import *
 from core.exceptions import BillzAPIError
+from app.utils import *
 
 
 class APIMethods:
@@ -77,9 +78,17 @@ class BillzService:
         response_data = response.json()
         return response_data.get("categories", [])
 
-    def fetch_products(self, page=1):
+    def fetch_products(self, page=1, last_updated_before: int | None=None):
+        params = {
+            "page": page, 
+            "limit": 500
+        }
+        if last_updated_before:
+            # get 1 hour before time UTC
+            one_hour_ago = datetime_now_utc() - timedelta(minutes=last_updated_before)
+            params["last_updated_date"] = one_hour_ago.strftime("%Y-%m-%d %H:%M:%S") # type: ignore
+
         url = f"{self.url}{APIMethods.products}"
-        params = {"page": page, "limit": 500}
         response = requests.get(url, headers=self.headers, params=params)
         response_data = response.json()
         return response_data.get("products", [])
