@@ -148,6 +148,27 @@ def create_product_from_billz(product_data):
     return billz_ids
 
 
+def update_filtered_product_quantity_from_billz(product_data, shop_id: int, skus: list):
+    products_by_shop = ProductByShop.objects.filter(product__sku__in=skus, shop_id=shop_id).select_related('product')
+    product_by_shop_map = {pb.product.billz_id: pb for pb in products_by_shop}
+    pbs_to_update = []
+    for product in product_data:
+        billz_id = product.get('id')
+        pb = product_by_shop_map.get(billz_id)
+        if not pb:
+            continue
+        
+        # find quantity for this shop
+        quantity = product["measurement_values"]["total_active_measurement_value"]
+        
+        if pb.quantity != quantity:
+            pb.quantity = quantity
+            pbs_to_update.append(pb)
+
+    if pbs_to_update:
+        ProductByShop.objects.bulk_update(pbs_to_update, ['quantity'], batch_size=500)
+
+
 def delete_products_not_in_billz(billz_ids):
     Product.objects.exclude(billz_id__in=billz_ids).delete()
 

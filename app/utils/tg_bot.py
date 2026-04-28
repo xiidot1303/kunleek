@@ -1,6 +1,6 @@
 from celery import shared_task
 import requests
-from config import WEBHOOK_URL
+from config import NEWSLETTER_URL
 
 
 @shared_task
@@ -17,7 +17,7 @@ def send_newsletter_api(
     ]
     """
     # get current host
-    API_URL = f"{WEBHOOK_URL}/send-newsletter/"
+    API_URL = f"{NEWSLETTER_URL}/send-newsletter/"
     data = {
         "user_id": bot_user_id,
         "text": text,

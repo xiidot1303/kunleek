@@ -216,6 +216,28 @@ class Strings:
         "Неверный или истекший срок действия промокода."
     ]
 
+    order_items_not_available = [
+        "❌ Buyurtma #{order_id} tarkibidagi ba'zi mahsulotlar mavjud emas:\n<i>{products}</i>\n\n" \
+            "Iltimos, buyurtmani yangilab qayta urinib ko'ring",
+        "❌ Некоторые товары в заказе #{order_id} недоступны:\n<i>{products}</i>\n\n" \
+            "Пожалуйста, обновите заказ и попробуйте еще раз"
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
+    _ = [
+        "",
+        ""
+    ]
+
     _ = [
         "",
         ""

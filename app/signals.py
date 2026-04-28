@@ -20,6 +20,9 @@ from celery.signals import task_failure
 from app.services.error_handler import run_on_error
 from payment.services import cancel_order_payment, fiscalize_payment
 from asgiref.sync import async_to_sync
+from app.services.signals_service import (
+    before_invoice_sending
+)
 
 
 @receiver(post_save, sender=Order)
@@ -34,7 +37,7 @@ def handle_cash_payment_order(sender, instance: Order, created, **kwargs):
     elif created:
         # send invoice to user with order information
         transaction.on_commit(
-            lambda: send_invoice_to_user.delay(instance.id)
+            lambda: before_invoice_sending.delay(instance.id)
         )
 
 

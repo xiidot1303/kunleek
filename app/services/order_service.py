@@ -5,6 +5,7 @@ from asgiref.sync import sync_to_async
 from core.exceptions import OrderError, BillzAPIError
 import html
 from app.utils.data_classes import OrderStatus
+from app.services.product_service import update_filtered_product_quantity_from_billz
 
 
 @shared_task
@@ -60,6 +61,39 @@ def send_order_to_billz(order_id):
             f"Response Data: <pre>{(html.escape(str(e.response_data)))}</pre>"
         )
         raise OrderError(error, order_id=order.id)
+
+
+def check_order_items_availability_from_billz(order: Order) -> list:
+    """
+    Returns product names list that not available
+    """
+    # update order products from Billz before
+    order_items = OrderItem.objects.filter(order_id=order.pk)
+    product_skus = list(order_items.values_list(
+        "product__sku", flat=True
+    ))
+
+    billz_service = BillzService(method=APIMethods.products_with_filter)
+    products = billz_service.fetch_products_with_filters(skus=product_skus, shop_ids=[order.shop.shop_id])
+    if products:
+        update_filtered_product_quantity_from_billz(products, order.shop.pk, product_skus)
+    
+
+    # check order items quantity from product by shops
+    products_by_shop_and_product = {}
+    for pb in ProductByShop.objects.filter(product__sku__in=product_skus, shop_id=order.shop.pk).select_related('product'):
+        products_by_shop_and_product[pb.product.pk] = pb
+    
+    products_not_available: list[str] = []
+    for order_item in order_items:
+        pb: ProductByShop = products_by_shop_and_product[order_item.product.pk]
+        if order_item.quantity > pb.quantity:
+            products_not_available.append(pb.product.name_ru or pb.product.name)
+    
+    return products_not_available
+
+
+
 
 async def get_order_by_id(id: int | str) -> Order | None:
     obj = await Order.objects.filter(id=id).afirst()

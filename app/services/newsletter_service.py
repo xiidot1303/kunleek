@@ -228,3 +228,15 @@ def ask_review_from_user(order_id):
         text=text,
         inline_buttons=inline_buttons
     )
+
+def notify_client_order_items_not_available(order: Order, products: list[str]):
+    bot_user: Bot_user = order.bot_user
+    products_text = "\n".join([f"🔹 {product}" for product in products])
+    text = Strings.order_items_not_available[bot_user.lang].format(
+        order_id=order.billz_id or order.id,
+        products=products_text
+    )
+    send_newsletter_api(
+        bot_user_id=bot_user.user_id,
+        text=text
+    )

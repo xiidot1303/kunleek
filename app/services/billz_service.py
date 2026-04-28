@@ -9,6 +9,7 @@ from app.utils import *
 class APIMethods:
     category = "v2/category"
     products = "v2/products"
+    products_with_filter = "v2/product-search-with-filters"
     clients = "v1/client"
     customer = "v1/customer"
     client_card = "v1/client-card"
@@ -29,23 +30,21 @@ class BillzService:
 
     def __init__(self, method):
         self.method = method
-        self.access_token = cache.get(
-            "billz_access_token") or self.fetch_and_cache_access_token()
+        self.access_token = (
+            cache.get("billz_access_token") or self.fetch_and_cache_access_token()
+        )
         self.headers = {
             "Authorization": f"Bearer {self.access_token}",
-            "platform-id": "7d4a4c38-dd84-4902-b744-0488b80a4c01"
-            }
+            "platform-id": "7d4a4c38-dd84-4902-b744-0488b80a4c01",
+        }
 
     def send_request(self, url, data=None, params=None, http_method="GET"):
         if http_method == "GET":
-            response = requests.get(
-                url, headers=self.headers, params=params)
+            response = requests.get(url, headers=self.headers, params=params)
         elif http_method == "POST":
-            response = requests.post(
-                url, headers=self.headers, json=data)
+            response = requests.post(url, headers=self.headers, json=data)
         elif http_method == "PUT":
-            response = requests.put(
-                url, headers=self.headers, json=data)
+            response = requests.put(url, headers=self.headers, json=data)
         else:
             raise ValueError("Unsupported HTTP method")
         response_data = response.json()
@@ -78,18 +77,25 @@ class BillzService:
         response_data = response.json()
         return response_data.get("categories", [])
 
-    def fetch_products(self, page=1, last_updated_before: int | None=None):
-        params = {
-            "page": page, 
-            "limit": 500
-        }
+    def fetch_products(self, page=1, last_updated_before: int | None = None):
+        params = {"page": page, "limit": 500}
         if last_updated_before:
             # get 1 hour before time UTC
             one_hour_ago = datetime_now_utc() - timedelta(minutes=last_updated_before)
-            params["last_updated_date"] = one_hour_ago.strftime("%Y-%m-%d %H:%M:%S") # type: ignore
+            params["last_updated_date"] = one_hour_ago.strftime("%Y-%m-%d %H:%M:%S")  # type: ignore
 
         url = f"{self.url}{APIMethods.products}"
         response = requests.get(url, headers=self.headers, params=params)
+        response_data = response.json()
+        return response_data.get("products", [])
+
+    def fetch_products_with_filters(self, page=1, skus=[], shop_ids=[]):
+        data = {
+            "shop_ids": shop_ids,
+            "skus": skus,
+        }
+        url = f"{self.url}{APIMethods.products_with_filter}"
+        response = requests.post(url, headers=self.headers, json=data)
         response_data = response.json()
         return response_data.get("products", [])
 
@@ -110,8 +116,7 @@ class BillzService:
             return None
         data = data[0]
         client_details: ClientDetails = DictToClass(data)
-        client_details.card = data.get(
-            "cards", [])[0] if data.get("cards") else None
+        client_details.card = data.get("cards", [])[0] if data.get("cards") else None
         return client_details
 
     def create_client(self, chat_id, first_name, phone_number) -> str:
@@ -119,7 +124,7 @@ class BillzService:
         payload = {
             "first_name": first_name,
             "phone_number": phone_number,
-            "chat_id": str(chat_id)
+            "chat_id": str(chat_id),
         }
         response = requests.post(url, headers=self.headers, json=payload)
         response_data = response.json()
@@ -134,53 +139,61 @@ class BillzService:
         client_details.id = response_data.get("id")
         client_details.first_name = response_data.get("first_name")
         client_details.last_name = response_data.get("last_name")
-        client_details.card = response_data.get(
-            "cards", [])[0]['code'] if response_data.get("cards") else None
+        client_details.card = (
+            response_data.get("cards", [])[0]["code"]
+            if response_data.get("cards")
+            else None
+        )
         client_details.balance = response_data.get("balance", 0)
         return client_details
 
     def create_client_card(self, client_id):
         url = f"{self.url}{APIMethods.client_card}"
-        payload = {
-            "customer_id": client_id
-        }
+        payload = {"customer_id": client_id}
         response = requests.post(url, headers=self.headers, json=payload)
         response_data = response.json()
         return response_data["card_code"]
 
     def create_order(self, shop_id, cashbox_id):
         url = f"{self.url}{APIMethods.create_order}?Billz-Response-Channel=HTTP"
-        data = {
-            "shop_id": shop_id,
-            "cashbox_id": cashbox_id
-        }
+        data = {"shop_id": shop_id, "cashbox_id": cashbox_id}
         try:
             response_data = self.send_request(url, data=data, http_method="POST")
         except BillzAPIError as e:
-            raise BillzAPIError(f"Failed to create order in Billz", url=e.url, response_data=e.response_data)
+            raise BillzAPIError(
+                f"Failed to create order in Billz",
+                url=e.url,
+                response_data=e.response_data,
+            )
         order_id = response_data.get("id")
         order_number = response_data.get("data", {}).get("order_number")
         self.order_id = order_id
         self.order_number = order_number
         return response_data
 
-    def add_product_to_order(self, product_id, quantity, is_manual=False, free_price: int | None=None):
+    def add_product_to_order(
+        self, product_id, quantity, is_manual=False, free_price: int | None = None
+    ):
         url = f"{self.url}v2/order-product/{self.order_id}"
         data = {
             "sold_measurement_value": quantity,
             "product_id": product_id,
             "used_wholesale_price": False,
             "is_manual": is_manual,
-            "response_type": "HTTP"
+            "response_type": "HTTP",
         }
         if free_price:
             data["free_price"] = free_price
             data["use_free_price"] = True
-            
+
         try:
             response_data = self.send_request(url, data=data, http_method="POST")
         except BillzAPIError as e:
-            raise BillzAPIError(f"Failed to add product to order in Billz", url=e.url, response_data=e.response_data)
+            raise BillzAPIError(
+                f"Failed to add product to order in Billz",
+                url=e.url,
+                response_data=e.response_data,
+            )
         return response_data
 
     def make_discount(self, amount):
@@ -195,46 +208,35 @@ class BillzService:
 
     def bind_client_to_order(self, client_id):
         url = f"{self.url}v2/order-customer-new/{self.order_id}?Billz-Response-Channel=HTTP"
-        data = {
-            "customer_id": client_id,
-            "check_auth_code": False
-        }
+        data = {"customer_id": client_id, "check_auth_code": False}
 
         response_data = self.send_request(url, data=data, http_method="PUT")
         return response_data
 
     def complete_order(self, paid_amount, payment_method, with_cashback=0):
         payment_types_by_method = {
-            "cash": {
-                "id": "f1bbdf7d-58e7-43bd-86ec-91ddf8193311",
-                "name": "Наличные"
-
-            },
-            "payme": {
-                "id": "49677309-d2c4-4dd8-8e9f-c9d05776ef71",
-                "name": "Payme"
-            },
-            "click": {
-                "id": "49677309-d2c4-4dd8-8e9f-c9d05776ef71",
-                "name": "Payme"
-            }
+            "cash": {"id": "f1bbdf7d-58e7-43bd-86ec-91ddf8193311", "name": "Наличные"},
+            "payme": {"id": "49677309-d2c4-4dd8-8e9f-c9d05776ef71", "name": "Payme"},
+            "click": {"id": "49677309-d2c4-4dd8-8e9f-c9d05776ef71", "name": "Payme"},
         }
         url = f"{self.url}v2/order-payment/{self.order_id}"
         data = {
             "payments": [
                 {
-                    "company_payment_type_id": payment_types_by_method[payment_method]["id"],
+                    "company_payment_type_id": payment_types_by_method[payment_method][
+                        "id"
+                    ],
                     "paid_amount": int(paid_amount),
                     "company_payment_type": {
                         "name": payment_types_by_method[payment_method]["name"]
                     },
-                    "returned_amount": 0
+                    "returned_amount": 0,
                 },
             ],
             "comment": "Telegram bot order",
             "with_cashback": int(with_cashback),
             "without_cashback": False,
-            "skip_ofd": False if payment_method == "cash" else True
+            "skip_ofd": False if payment_method == "cash" else True,
         }
 
         response_data = self.send_request(url, data=data, http_method="POST")
