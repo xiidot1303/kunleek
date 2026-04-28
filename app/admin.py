@@ -366,11 +366,10 @@ class OrderResource(resources.ModelResource):
 @admin.register(Order)
 class OrderAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OrderResource
-    list_display = ('billz_id', 'shop', 'bot_user', 'customer', 'delivery_type',
+    list_display = ('id', 'billz_id', 'shop', 'bot_user', 'customer', 'delivery_type',
                     'payment_method', 'delivery_price', 'total', 'status', 'created_at')
-    search_fields = ('customer__first_name',
-                     'delivery_type__title_en', 'payment_method')
-    list_filter = ('delivery_type', 'payment_method', 'created_at', 'shop')
+    search_fields = ('customer__first_name', 'id')
+    list_filter = ('id', 'delivery_type', 'payment_method', 'shop')
     inlines = [OrderItemInline, OrderReviewInline, PaymeTransactionInline, ClickTransactionInline]
 
 
