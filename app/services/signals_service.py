@@ -32,4 +32,9 @@ def before_invoice_sending(order_id):
         send_invoice_to_user.delay(order_id)
     except Exception as e:
         notify_client_order_error(order_id)
+        error = (
+            f"<b>Error occurred before invoice sending:</b> {e}\n"
+            f"ID: {order.id}\n"
+        )
+        raise Exception(error)
 
