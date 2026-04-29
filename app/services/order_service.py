@@ -1,4 +1,4 @@
-from app.models import Order, Product, OrderItem, ProductByShop
+from app.models import Order, Product, OrderItem, ProductByShop, BillzOrder
 from celery import shared_task
 from app.services.billz_service import BillzService, APIMethods
 from asgiref.sync import sync_to_async
@@ -6,51 +6,60 @@ from core.exceptions import OrderError, BillzAPIError
 import html
 from app.utils.data_classes import OrderStatus
 from app.services.product_service import update_filtered_product_quantity_from_billz
+from asgiref.sync import sync_to_async
+from app.services.error_handler import run_on_error
 
 
 @shared_task
-def send_order_to_billz(order_id):
+def send_order_to_billz(order_id, created_order_id: str | None = None):
     try:
         order = Order.objects.get(id=order_id)
-        items = order.items.all()
-
-        billz_service = BillzService(method=APIMethods.create_order)
-        billz_service.create_order(
-            shop_id=order.shop.shop_id,
-            cashbox_id=order.shop.cashbox_id
-        )
-        # add products to the order
-        for item in items:
-            item: OrderItem
-            product_by_shop = ProductByShop.objects.get(product=item.product, shop=order.shop)
-            bot_price = product_by_shop.price
-            billz_price = product_by_shop.original_price
-            if bot_price != billz_price:
-                is_manual = True
-                free_price = int(bot_price)
-            else:
-                is_manual = False
-                free_price = None
-                
-            billz_service.add_product_to_order(
-                product_id=item.product.billz_id,
-                quantity=item.quantity,
-                is_manual=is_manual,
-                free_price=free_price
-            )
-
-        billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
         payed_amount = order.subtotal - order.bonus_used - order.discount_amount
-        if order.discount_amount:
-            billz_service.make_discount(amount=payed_amount)
-        billz_service.complete_order(
-            paid_amount=payed_amount, 
-            payment_method=order.payment_method,
-            with_cashback=order.bonus_used
+        billz_service = BillzService(method=APIMethods.create_order)
+        if not created_order_id:
+
+            items = order.items.all()
+            billz_service.create_order(
+                shop_id=order.shop.shop_id,
+                cashbox_id=order.shop.cashbox_id
             )
-        
-        order.billz_id = billz_service.order_number
-        order.save(update_fields=["billz_id"])
+            # add products to the order
+            for item in items:
+                item: OrderItem
+                product_by_shop = ProductByShop.objects.get(product=item.product, shop=order.shop)
+                bot_price = product_by_shop.price
+                billz_price = product_by_shop.original_price
+                if bot_price != billz_price:
+                    is_manual = True
+                    free_price = int(bot_price)
+                else:
+                    is_manual = False
+                    free_price = None
+
+                billz_service.add_product_to_order(
+                    product_id=item.product.billz_id,
+                    quantity=item.quantity,
+                    is_manual=is_manual,
+                    free_price=free_price
+                )
+
+            billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
+            if order.discount_amount:
+                billz_service.make_discount(amount=payed_amount)
+            
+            return
+        else:
+            billz_service.complete_order(
+                paid_amount=payed_amount, 
+                payment_method=order.payment_method,
+                with_cashback=order.bonus_used
+            )
+            BillzOrder.objects.create(
+                order=order,
+                billz_id=billz_service.order_id,
+            )
+            order.billz_id = billz_service.order_number
+            order.save(update_fields=["billz_id"])
     except BillzAPIError as e:
         order.status = OrderStatus.ERROR_IN_BILLZ_API
         order.save(update_fields=["status"])
@@ -101,9 +110,16 @@ async def get_order_by_id(id: int | str) -> Order | None:
 
 
 async def order_pay(order: Order, payment_system):
-    order.payed = True
-    order.payment_system = payment_system
-    await order.asave(update_fields=['payed', 'payment_system'])
+    try:
+        billz_order = await BillzOrder.objects.filter(order_id=order.pk).alast()
+        await sync_to_async(send_order_to_billz)(order.pk , billz_order.billz_id)
+        order.payed = True
+        order.payment_system = payment_system
+        await order.asave(update_fields=['payed', 'payment_system'])
+    except OrderError as e:
+        # send to admin
+        await sync_to_async(run_on_error)(e)
+        raise e
 
 
 def get_order_items_list_by_order_id(order_id: int | str) -> list | None:

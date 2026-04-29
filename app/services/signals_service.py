@@ -9,7 +9,7 @@ from app.services.newsletter_service import (
     notify_client_order_cancellation,
     notify_client_order_items_not_available
     )
-from app.services.order_service import check_order_items_availability_from_billz
+from app.services.order_service import check_order_items_availability_from_billz, send_order_to_billz
 from django.db import transaction
 from app.services.yandex_delivery_service import create_claim
 from config import DEBUG
@@ -23,13 +23,17 @@ from app.services.billz_service import BillzService, APIMethods
 @shared_task
 def before_invoice_sending(order_id):
     try:
+        # check order items quantity in real remaining of the Billz
         order: Order = Order.objects.select_related('shop').get(id=order_id)
         products_not_available: list = check_order_items_availability_from_billz(order)
         if products_not_available:
             notify_client_order_items_not_available(order, products_not_available)
             return
+        
+        # create order in Billz
+        send_order_to_billz(order_id)
 
-        send_invoice_to_user.delay(order_id)
+        send_invoice_to_user(order_id)
     except Exception as e:
         notify_client_order_error(order_id)
         error = (

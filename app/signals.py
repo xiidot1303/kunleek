@@ -50,21 +50,11 @@ def handle_order_status_change(sender, instance: Order, update_fields, **kwargs)
         # change order status
         instance.status = OrderStatus.READY_TO_APPROVAL
         instance.save(update_fields=["status"])
-    elif (
-        instance.status == OrderStatus.READY_TO_APPROVAL
-          and "status" in update_fields
-          and not instance.billz_id 
-          and not DEBUG
-        ):
-        # send order to billz
-        transaction.on_commit(
-            lambda: send_order_to_billz.delay(instance.id)
-        )
 
     elif (
         instance.status == OrderStatus.READY_TO_APPROVAL 
         and not instance.sent_to_group
-        and "billz_id" in update_fields
+        and "status" in update_fields
         ):
         instance.sent_to_group = True
         instance.save(update_fields=["sent_to_group"])
@@ -109,17 +99,17 @@ def handle_order_status_change(sender, instance: Order, update_fields, **kwargs)
             lambda: notify_client_order_error.delay(instance.id)
         )
         # cancel payment
-        status = async_to_sync(cancel_order_payment)(instance)
-        if status == "success":
-            instance.status = OrderStatus.PAYMENT_RETURNED
-            instance.save(update_fields=None)
-        elif status == "error":
-            instance.status = OrderStatus.PAYMENT_RETURN_ERROR
-            instance.save(update_fields=None)
-        if instance.payment_method != PaymentMethod.CASH:
-            transaction.on_commit(
-                lambda: notify_client_order_cancellation.delay(instance.id)
-            )
+        # status = async_to_sync(cancel_order_payment)(instance)
+        # if status == "success":
+        #     instance.status = OrderStatus.PAYMENT_RETURNED
+        #     instance.save(update_fields=None)
+        # elif status == "error":
+        #     instance.status = OrderStatus.PAYMENT_RETURN_ERROR
+        #     instance.save(update_fields=None)
+        # if instance.payment_method != PaymentMethod.CASH:
+        #     transaction.on_commit(
+        #         lambda: notify_client_order_cancellation.delay(instance.id)
+        #     )
 
 
 @receiver(post_save, sender=OrderItem)
