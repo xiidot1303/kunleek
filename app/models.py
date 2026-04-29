@@ -356,4 +356,4 @@ class BillzOrder(models.Model):
     order = models.ForeignKey(Order, null=True, on_delete=models.CASCADE)
     billz_id = models.CharField(null=True, max_length=255, unique=True)
     is_complete = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(null=True, auto_now_add=True)

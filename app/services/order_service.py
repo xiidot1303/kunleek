@@ -46,17 +46,16 @@ def send_order_to_billz(order_id, created_order_id: str | None = None):
             billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
             if order.discount_amount:
                 billz_service.make_discount(amount=payed_amount)
-            
+            BillzOrder.objects.create(
+                order=order,
+                billz_id=billz_service.order_id,
+            )
             return
         else:
             billz_service.complete_order(
                 paid_amount=payed_amount, 
                 payment_method=order.payment_method,
                 with_cashback=order.bonus_used
-            )
-            BillzOrder.objects.create(
-                order=order,
-                billz_id=billz_service.order_id,
             )
             order.billz_id = billz_service.order_number
             order.save(update_fields=["billz_id"])
