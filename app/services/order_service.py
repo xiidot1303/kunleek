@@ -50,6 +50,8 @@ def send_order_to_billz(order_id, created_order_id: str | None = None):
                 order=order,
                 billz_id=billz_service.order_id,
             )
+            order.billz_id = billz_service.order_number
+            order.save(update_fields=["billz_id"])
             return
         else:
             billz_service.order_id = created_order_id
@@ -58,11 +60,11 @@ def send_order_to_billz(order_id, created_order_id: str | None = None):
                 payment_method=order.payment_method,
                 with_cashback=order.bonus_used
             )
-            order.billz_id = billz_service.order_number
-            order.save(update_fields=["billz_id"])
     except BillzAPIError as e:
         order.status = OrderStatus.ERROR_IN_BILLZ_API
-        order.save(update_fields=["status"])
+        order.billz_id = None
+
+        order.save(update_fields=["status", "billz_id"])
         error = (
             f"<b>Error occurred while sending order to Billz:</b> {e}\n"
             f"ID: {order.id}\n"
