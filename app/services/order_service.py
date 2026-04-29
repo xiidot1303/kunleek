@@ -52,6 +52,7 @@ def send_order_to_billz(order_id, created_order_id: str | None = None):
             )
             return
         else:
+            billz_service.order_id = created_order_id
             billz_service.complete_order(
                 paid_amount=payed_amount, 
                 payment_method=order.payment_method,
