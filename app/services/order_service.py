@@ -42,8 +42,11 @@ def send_order_to_billz(order_id, created_order_id: str | None = None):
                     is_manual=is_manual,
                     free_price=free_price
                 )
-
-            billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
+            try:
+                billz_service.bind_client_to_order(client_id=order.bot_user.billz_id)
+            except:
+                pass
+            
             if order.discount_amount:
                 billz_service.make_discount(amount=payed_amount)
             BillzOrder.objects.create(
