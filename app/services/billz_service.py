@@ -97,6 +97,7 @@ class BillzService:
         url = f"{self.url}{APIMethods.products_with_filter}"
         response = requests.post(url, headers=self.headers, json=data)
         response_data = response.json()
+        response_data = self.send_request(url, data=data, http_method="POST")
         return response_data.get("products", [])
 
     def fetch_clients(self, page=1):
@@ -109,8 +110,14 @@ class BillzService:
     def get_client_by_phone_number(self, phone_number) -> ClientDetails | None:
         url = f"{self.url}{APIMethods.clients}"
         params = {"phone_number": phone_number}
-        response = requests.get(url, headers=self.headers, params=params)
-        response_data = response.json()
+        try:
+            response_data = self.send_request(url, params=params, http_method="GET")
+        except BillzAPIError as e:
+            raise BillzAPIError(
+                f"Failed to add product to order in Billz",
+                url=e.url,
+                response_data=e.response_data,
+            )
         data = response_data.get("clients", {})
         if not data:
             return None
@@ -126,15 +133,27 @@ class BillzService:
             "phone_number": phone_number,
             "chat_id": str(chat_id),
         }
-        response = requests.post(url, headers=self.headers, json=payload)
-        response_data = response.json()
+        try:
+            response_data = self.send_request(url=url, data=payload, http_method="POST")
+        except BillzAPIError as e:
+            raise BillzAPIError(
+                f"Failed to add product to order in Billz",
+                url=e.url,
+                response_data=e.response_data,
+            )
         id = response_data.get("id")
         return id
 
     def get_client_by_id(self, client_id) -> ClientDetails | None:
         url = f"{self.url}{APIMethods.customer}/{client_id}"
-        response = requests.get(url, headers=self.headers)
-        response_data = response.json()
+        try:
+            response_data = self.send_request(url, http_method="GET")
+        except BillzAPIError as e:
+            raise BillzAPIError(
+                f"Failed to add product to order in Billz",
+                url=e.url,
+                response_data=e.response_data,
+            )
         client_details: ClientDetails = ClientDetails()
         client_details.id = response_data.get("id")
         client_details.first_name = response_data.get("first_name")
@@ -150,8 +169,14 @@ class BillzService:
     def create_client_card(self, client_id):
         url = f"{self.url}{APIMethods.client_card}"
         payload = {"customer_id": client_id}
-        response = requests.post(url, headers=self.headers, json=payload)
-        response_data = response.json()
+        try:
+            response_data = self.send_request(url, data=payload, http_method="POST")
+        except BillzAPIError as e:
+            raise BillzAPIError(
+                f"Failed to add product to order in Billz",
+                url=e.url,
+                response_data=e.response_data,
+            )
         return response_data["card_code"]
 
     def create_order(self, shop_id, cashbox_id):
